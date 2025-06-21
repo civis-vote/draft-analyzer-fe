@@ -6,111 +6,104 @@ import {
   Popconfirm,
   message,
   Spin,
-} from 'antd';
-import { useEffect, useState } from 'react';
-import PromptsForm from './PromptsForm';
-import {
-  getPrompts,
-  createPrompt,
-  updatePrompt,
-  deletePrompt,
-} from '@/services/prompt-dashboard/promptService';
-import { Prompt } from '@/model/PromptModel';
-import { removeEmptyFields } from '@/utils/helpers';
+} from "antd";
+import { useEffect, useState } from "react";
+import PromptsForm from "./PromptsForm";
+import { Prompt } from "@/model/PromptModel";
+import { removeEmptyFields } from "@/utils/helpers";
+import { usePromptStore } from "@/store/promptStore";
 
 const { Title, Text } = Typography;
 
 const Prompts = () => {
-  const [search, setSearch] = useState('');
-  const [data, setData] = useState<Prompt[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
-  const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
+  const [formMode, setFormMode] = useState<"add" | "edit">("add");
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
 
+  const {
+    prompts,
+    promptsLoading,
+    promptsError,
+    fetchPrompts,
+    addPrompt,
+    updatePromptById,
+    deletePromptById,
+  } = usePromptStore();
+
+  // Fetch prompts on mount
   useEffect(() => {
-    fetchData();
+    if (prompts.length === 0) {
+      fetchPrompts().catch(() => {
+        message.error("Failed to load prompts");
+      });
+    }
   }, []);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const prompts = await getPrompts();
-      setData(prompts);
-    } catch (error) {
-      message.error('Failed to load prompts');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const showAddModal = () => {
-    setFormMode('add');
+    setFormMode("add");
     setSelectedPrompt(null);
     setModalVisible(true);
   };
 
   const handleRowClick = (record: Prompt) => {
-    setFormMode('edit');
+    setFormMode("edit");
     setSelectedPrompt(record);
     setModalVisible(true);
   };
 
   const handleSubmit = async (prompt: Prompt) => {
     const cleanedPrompt = removeEmptyFields(prompt);
+
     try {
-      if (formMode === 'add') {
-        const created = await createPrompt(cleanedPrompt);
-        setData((prev) => [...prev, created]);
-        message.success('Prompt created');
+      if (formMode === "add") {
+        await addPrompt(cleanedPrompt as Prompt);
+        message.success("Prompt created");
       } else {
-        const updated = await updatePrompt(cleanedPrompt);
-        setData((prev) =>
-          prev.map((d) => (d.prompt_id === updated.prompt_id ? updated : d))
-        );
-        message.success('Prompt updated');
+        await updatePromptById(cleanedPrompt as Prompt);
+        message.success("Prompt updated");
       }
     } catch (err) {
-      message.error('Operation failed');
+      message.error("Operation failed");
     } finally {
       setModalVisible(false);
+      setSelectedPrompt(null);
     }
   };
 
   const handleDelete = async (id: number) => {
     try {
-      await deletePrompt(id);
-      setData((prev) => prev.filter((doc) => doc.prompt_id !== id));
-      message.success('Prompt deleted');
+      await deletePromptById(id);
+      message.success("Prompt deleted");
     } catch (err) {
-      message.error('Failed to delete prompt');
+      message.error("Failed to delete prompt");
     }
   };
 
   const columns = [
     {
-      title: 'Criteria',
-      dataIndex: 'criteria',
-      key: 'criteria',
+      title: "Criteria",
+      dataIndex: "criteria",
+      key: "criteria",
     },
     {
-      title: 'Question',
-      dataIndex: 'question',
-      key: 'question',
+      title: "Question",
+      dataIndex: "question",
+      key: "question",
     },
     {
-      title: 'Created By',
-      dataIndex: 'created_by',
-      key: 'created_by',
+      title: "Created By",
+      dataIndex: "created_by",
+      key: "created_by",
     },
     {
-      title: 'Created On',
-      dataIndex: 'created_on',
-      key: 'created_on',
+      title: "Created On",
+      dataIndex: "created_on",
+      key: "created_on",
     },
     {
-      title: 'Actions',
-      key: 'actions',
+      title: "Actions",
+      key: "actions",
       render: (_: any, record: Prompt) => (
         <div className="flex gap-4">
           <Button
@@ -147,6 +140,14 @@ const Prompts = () => {
     },
   ];
 
+  if (promptsError) {
+    return (
+      <div className="text-red-500">
+        Something went wrong while loading prompts.
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       <Title level={2}>Prompt Management</Title>
@@ -166,14 +167,14 @@ const Prompts = () => {
         </Button>
       </div>
 
-      {loading ? (
+      {promptsLoading ? (
         <div className="text-center mt-10">
           <Spin size="large" />
         </div>
       ) : (
         <Table
           columns={columns}
-          dataSource={data.filter((d) =>
+          dataSource={prompts.filter((d) =>
             d.criteria.toLowerCase().includes(search.toLowerCase())
           )}
           rowKey="prompt_id"

@@ -36,7 +36,7 @@ const PromptEvaluation: React.FC = () => {
   }, [docId]);
 
   return (
-    <Card style={{ marginTop: 32 }} variant="borderless">
+    <Card className="shadow-lg rounded-2xl p-6 mx-auto mt-8 mb-16">
       <Title level={3} style={{ textAlign: "center" }}>
         Evaluation by Prompts
       </Title>

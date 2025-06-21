@@ -22,8 +22,8 @@ const { Paragraph, Text } = Typography;
 const pieColors = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#A9A9F5"];
 
 const ScoreAnalysis: React.FC = () => {
-  const fileName = useDocumentStore((state) => state.uploadResponse?.fileName);
-  const docId = useDocumentStore((state) => state.uploadResponse?.docId);
+  const fileName = useDocumentStore((state) => state.uploadResponse?.file_name);
+  const docId = useDocumentStore((state) => state.uploadResponse?.doc_id);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ScoreAnalysisResponse | null>(null);
 
@@ -58,7 +58,7 @@ const ScoreAnalysis: React.FC = () => {
   }
 
   return (
-    <div style={{ marginTop: 32 }}>
+    <Card className="shadow-lg rounded-2xl p-6 mx-auto mt-8 mb-16">
       <Row gutter={[16, 16]} justify="center">
         <Col xs={24} sm={12} md={6}>
           <Card>
@@ -147,7 +147,7 @@ const ScoreAnalysis: React.FC = () => {
           Download Results
         </Button>
       </div>
-    </div>
+    </Card>
   );
 };
 

@@ -9,40 +9,36 @@ import {
 } from 'antd';
 import { useEffect, useState } from 'react';
 import DocumentTypeForm from './DocumentTypeForm';
-import {
-  getDocumentTypes,
-  createDocumentType,
-  updateDocumentType,
-  deleteDocumentType,
-} from '@/services/prompt-dashboard/documentTypeService';
 import { DocumentType } from '@/model/DocumentModels';
 import { removeEmptyFields } from '@/utils/helpers';
+import { useDocumentTypeStore } from '@/store/documentStore';
 
 const { Title, Text } = Typography;
 
 const DocumentTypes = () => {
   const [search, setSearch] = useState('');
-  const [data, setData] = useState<DocumentType[]>([]);
-  const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
   const [selectedDoc, setSelectedDoc] = useState<DocumentType | null>(null);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const {
+      documentTypes,
+      documentTypesLoading,
+      documentTypesError,
+      fetchDocumentTypes,
+      addDocumentType,
+      updateDocumentTypeById,
+      deleteDocumentTypeById,
+    } = useDocumentTypeStore();
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const docs = await getDocumentTypes();
-      setData(docs);
-    } catch (error) {
-      message.error('Failed to load document types');
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Fetch document types on mount
+    useEffect(() => {
+      if (documentTypes.length === 0) {
+        fetchDocumentTypes().catch(() => {
+          message.error('Failed to load document types');
+        });
+      }
+    }, []);
 
   const showAddModal = () => {
     setFormMode('add');
@@ -56,39 +52,34 @@ const DocumentTypes = () => {
     setModalVisible(true);
   };
 
-  const handleSubmit = async (doc: DocumentType) => {
+ const handleSubmit = async (doc: DocumentType) => {
+     const cleanedDoc = removeEmptyFields(doc);
 
-    const cleanedDoc = removeEmptyFields(doc);
-    
-    try {
-      if (formMode === 'add') {
-        const createdDoc = await createDocumentType(cleanedDoc as DocumentType);
-        setData((prev) => [...prev, createdDoc]);
-        message.success('Document type created');
-      } else {
-        const updatedDoc = await updateDocumentType(cleanedDoc as DocumentType);
-        setData((prev) =>
-          prev.map((d) => (d.doc_type_id === updatedDoc.doc_type_id ? updatedDoc : d))
-        );
-        message.success('Document type updated');
-      }
-    } catch (err) {
-      message.error('Operation failed');
-    } finally {
-      setModalVisible(false);
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    try {
-      await deleteDocumentType(id);
-      setData((prev) => prev.filter((doc) => doc.doc_type_id !== id));
-      message.success('Document type deleted');
-    } catch (err) {
-      message.error('Failed to delete document type');
-    }
-  };
-
+     try {
+       if (formMode === 'add') {
+         await addDocumentType(cleanedDoc as DocumentType);
+         message.success('Document type created');
+       } else {
+         await updateDocumentTypeById(cleanedDoc as DocumentType);
+         message.success('Document type updated');
+       }
+     } catch (err) {
+       message.error('Operation failed');
+     } finally {
+       setModalVisible(false);
+       setSelectedDoc(null);
+     }
+   };
+ 
+   const handleDelete = async (id: number) => {
+     try {
+       await deleteDocumentTypeById(id);
+       message.success('Document type deleted');
+     } catch (err) {
+       message.error('Failed to delete document type');
+     }
+   };
+ 
   const columns = [
     {
       title: 'Name',
@@ -150,6 +141,10 @@ const DocumentTypes = () => {
     },
   ];
 
+  if (documentTypesError) {
+    return <div className="text-red-500">Something went wrong while loading document types.</div>;
+  }
+
   return (
     <div className="p-6">
       <Title level={2}>Policy Dashboard</Title>
@@ -169,14 +164,14 @@ const DocumentTypes = () => {
         </Button>
       </div>
 
-      {loading ? (
+      {documentTypesLoading ? (
         <div className="text-center mt-10">
           <Spin size="large" />
         </div>
       ) : (
         <Table
           columns={columns}
-          dataSource={data.filter((d) =>
+          dataSource={documentTypes.filter((d) =>
             d.doc_type_name.toLowerCase().includes(search.toLowerCase())
           )}
           rowKey="doc_type_id"

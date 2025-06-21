@@ -5,7 +5,6 @@ import {
   Typography,
   Card,
   Button,
-  Space,
   Modal,
   message,
 } from "antd";
@@ -15,8 +14,8 @@ import { createDocument, uploadDocument } from "@/services/documentService";
 import { useDocumentStore } from "@/store/documentStore";
 import AssessmentsSection from "@/components/AssessmentsSection";
 import { DocumentType, UploadResponse } from "@/model/DocumentModels";
-import DocumentMetadataCard from "./upload-section/DocumentMetadataCard";
-import DocumentTypeSelector from "./upload-section/DocumentTypeSelector";
+import DocumentMetadataCard from "./DocumentMetadataCard";
+import DocumentTypeSelector from "./DocumentTypeSelector";
 
 const { Dragger } = Upload;
 const { Title, Paragraph, Text } = Typography;
@@ -128,18 +127,9 @@ export default function UploadSection() {
   };
 
   return (
-    <Card
-      className="shadow-md rounded-lg mb-8"
-      styles={{
-        body: {
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "1.5rem",
-        },
-      }}
-    >
-      <div className="text-center">
+  <Card className="shadow-lg rounded-2xl p-6 mx-auto mt-8 mb-16">
+    <div className="flex flex-col items-center gap-6">
+      <div className="text-center mt-4">
         <Title level={3} style={{ margin: 0, color: "#1f2937" }}>
           Document Analyzer
         </Title>
@@ -148,36 +138,38 @@ export default function UploadSection() {
         </Paragraph>
       </div>
 
-      <Dragger {...props} style={{ padding: 16, width: "100%" }}>
-        <CloudUploadOutlined
-          style={{
-            fontSize: "2.5rem",
-            color: "#9ca3af",
-            marginBottom: "0.5rem",
-          }}
-        />
-        <p className="ant-upload-text">
-          Click or drag file to this area to upload
-        </p>
-        <p className="ant-upload-hint text-gray-500 text-sm">
-          Supported formats: .pdf, .doc, .docx, .txt
-        </p>
-      </Dragger>
+      <div className="w-full px-6 max-w-lg">
+        <Dragger {...props} style={{ padding: 24 }}>
+          <CloudUploadOutlined
+            style={{
+              fontSize: "2.5rem",
+              color: "#9ca3af",
+              marginBottom: "0.5rem",
+            }}
+          />
+          <p className="ant-upload-text text-base font-medium">
+            Click or drag file to this area to upload
+          </p>
+          <p className="ant-upload-hint text-gray-500 text-sm">
+            Supported formats: .pdf, .doc, .docx, .txt
+          </p>
+        </Dragger>
+      </div>
 
       {isUploading && (
-        <div className="w-full mt-4">
+        <div className="w-11/12 mt-4">
           <Progress percent={uploadProgress} status="active" />
         </div>
       )}
 
       {error && (
-        <div className="text-red-500 mt-4">
+        <div className="text-red-500 mt-2">
           <Text type="danger">{error}</Text>
         </div>
       )}
 
       {!isUploading && uploadedFile && showSummarize && (
-        <>
+        <div className="w-full px-6 flex flex-col items-center gap-6">
           {useDocumentStore.getState().uploadResponse && (
             <DocumentMetadataCard
               document={
@@ -191,15 +183,17 @@ export default function UploadSection() {
           {selectedDocType && (
             <>
               <AssessmentsSection documentType={selectedDocType} />
-              <Space style={{ marginTop: 24 }}>
-                <Button type="primary" onClick={proceedWithSummarization}>
+              <div className="mt-4">
+                <Button type="primary" ghost onClick={proceedWithSummarization}>
                   Proceed with Analysis
                 </Button>
-              </Space>
+              </div>
             </>
           )}
-        </>
+        </div>
       )}
-    </Card>
-  );
+    </div>
+  </Card>
+);
+
 }

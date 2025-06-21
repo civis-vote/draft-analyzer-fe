@@ -6,52 +6,48 @@ import {
   Popconfirm,
   message,
   Spin,
-} from 'antd';
-import { useEffect, useState } from 'react';
-import {
-  getAssessmentAreas,
-  createAssessmentArea,
-  updateAssessmentArea,
-  deleteAssessmentArea,
-} from '@/services/prompt-dashboard/assessmentAreaService';
-import { AssessmentArea } from '@/model/AssessmentAreaModel';
-import { removeEmptyFields } from '@/utils/helpers';
-import AssessmentAreaForm from './AssessmentAreaForm';
+} from "antd";
+import { useEffect, useState } from "react";
+import { AssessmentArea } from "@/model/AssessmentAreaModel";
+import { removeEmptyFields } from "@/utils/helpers";
+import AssessmentAreaForm from "./AssessmentAreaForm";
+import { useAssessmentAreaStore } from "@/store/assessmentAreaStore";
 
 const { Title, Text } = Typography;
 
 const AssessmentAreas = () => {
-  const [search, setSearch] = useState('');
-  const [data, setData] = useState<AssessmentArea[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
-  const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
+  const [formMode, setFormMode] = useState<"add" | "edit">("add");
   const [selectedArea, setSelectedArea] = useState<AssessmentArea | null>(null);
 
+  const {
+    assessmentAreas,
+    assessmentAreasLoading,
+    assessmentAreasError,
+    fetchAssessmentAreas,
+    addAssessmentArea,
+    updateAssessmentAreaById,
+    deleteAssessmentAreaById,
+  } = useAssessmentAreaStore();
+
+  // Fetch assessment areas on mount
   useEffect(() => {
-    fetchData();
+    if (assessmentAreas.length === 0) {
+      fetchAssessmentAreas().catch(() => {
+        message.error("Failed to load assessment areas");
+      });
+    }
   }, []);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const areas = await getAssessmentAreas();
-      setData(areas);
-    } catch (error) {
-      message.error('Failed to load assessment areas');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const showAddModal = () => {
-    setFormMode('add');
+    setFormMode("add");
     setSelectedArea(null);
     setModalVisible(true);
   };
 
   const handleRowClick = (record: AssessmentArea) => {
-    setFormMode('edit');
+    setFormMode("edit");
     setSelectedArea(record);
     setModalVisible(true);
   };
@@ -60,58 +56,54 @@ const AssessmentAreas = () => {
     const cleanedArea = removeEmptyFields(area);
 
     try {
-      if (formMode === 'add') {
-        const created = await createAssessmentArea(cleanedArea as AssessmentArea);
-        setData((prev) => [...prev, created]);
-        message.success('Assessment area created');
+      if (formMode === "add") {
+        await addAssessmentArea(cleanedArea as AssessmentArea);
+        message.success("Assessment area created");
       } else {
-        const updated = await updateAssessmentArea(cleanedArea as AssessmentArea);
-        setData((prev) =>
-          prev.map((a) => (a.assessment_id === updated.assessment_id ? updated : a))
-        );
-        message.success('Assessment area updated');
+        await updateAssessmentAreaById(cleanedArea as AssessmentArea);
+        message.success("Assessment area updated");
       }
     } catch (err) {
-      message.error('Operation failed');
+      message.error("Operation failed");
     } finally {
       setModalVisible(false);
+      setSelectedArea(null);
     }
   };
 
   const handleDelete = async (id: number) => {
     try {
-      await deleteAssessmentArea(id);
-      setData((prev) => prev.filter((area) => area.assessment_id !== id));
-      message.success('Assessment area deleted');
+      await deleteAssessmentAreaById(id);
+      message.success("Assessment area deleted");
     } catch (err) {
-      message.error('Failed to delete assessment area');
+      message.error("Failed to delete assessment area");
     }
   };
 
   const columns = [
     {
-      title: 'Name',
-      dataIndex: 'assessment_name',
-      key: 'assessment_name',
+      title: "Name",
+      dataIndex: "assessment_name",
+      key: "assessment_name",
     },
     {
-      title: 'Description',
-      dataIndex: 'description',
-      key: 'description',
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
     },
     {
-      title: 'Created By',
-      dataIndex: 'created_by',
-      key: 'created_by',
+      title: "Created By",
+      dataIndex: "created_by",
+      key: "created_by",
     },
     {
-      title: 'Created On',
-      dataIndex: 'created_on',
-      key: 'created_on',
+      title: "Created On",
+      dataIndex: "created_on",
+      key: "created_on",
     },
     {
-      title: 'Actions',
-      key: 'actions',
+      title: "Actions",
+      key: "actions",
       render: (_: any, record: AssessmentArea) => (
         <div className="flex gap-4">
           <Button
@@ -148,7 +140,13 @@ const AssessmentAreas = () => {
       ),
     },
   ];
-
+  if (assessmentAreasError) {
+    return (
+      <div className="text-red-500">
+        Something went wrong while loading assessment areas.
+      </div>
+    );
+  }
   return (
     <div className="p-6">
       <Title level={2}>Assessment Areas</Title>
@@ -168,14 +166,14 @@ const AssessmentAreas = () => {
         </Button>
       </div>
 
-      {loading ? (
+      {assessmentAreasLoading ? (
         <div className="text-center mt-10">
           <Spin size="large" />
         </div>
       ) : (
         <Table
           columns={columns}
-          dataSource={data.filter((d) =>
+          dataSource={assessmentAreas.filter((d) =>
             d.assessment_name?.toLowerCase().includes(search.toLowerCase())
           )}
           rowKey="assessment_id"

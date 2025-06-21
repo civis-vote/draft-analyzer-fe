@@ -1,8 +1,7 @@
 import { Modal, Input, Button, Card, Checkbox } from 'antd';
 import { useEffect, useState } from 'react';
 import { AssessmentArea } from '@/model/AssessmentAreaModel';
-import { getPrompts } from '@/services/prompt-dashboard/promptService';
-import { Prompt } from '@/model/PromptModel';
+import { usePromptStore } from '@/store/promptStore';
 
 interface Props {
   visible: boolean;
@@ -29,7 +28,20 @@ const AssessmentAreaForm: React.FC<Props> = ({
     updated_on: '',
     prompt_ids: [],
   });
-  const [promptOptions, setPromptOptions] = useState<Prompt[]>([]);
+    const {
+      prompts,
+      fetchPrompts,
+    } = usePromptStore();
+  
+    // Fetch prompts on mount
+    useEffect(() => {
+      if (prompts.length === 0) {
+        fetchPrompts().catch((error) => {
+          console.error('Failed to fetch prompts:', error);
+        });
+      }
+    }, []);
+
   useEffect(() => {
     if (mode === 'edit' && initialData) {
       setFormData(initialData);
@@ -43,19 +55,6 @@ const AssessmentAreaForm: React.FC<Props> = ({
       } as AssessmentArea);
     }
   }, [mode, initialData]);
-
-  useEffect(() => {
-    const fetchPrompts = async () => {
-      try {
-        const result = await getPrompts();
-        setPromptOptions(result);
-      } catch (error) {
-        console.error('Failed to fetch prompts:', error);
-      }
-    };
-
-    fetchPrompts();
-  }, []);
   
   const handleChange = (field: keyof AssessmentArea, value: string | number[]) => {
     setFormData({ ...formData, [field]: value });
@@ -116,7 +115,7 @@ const AssessmentAreaForm: React.FC<Props> = ({
               onChange={(val) => handleChange('prompt_ids', val)}
             >
               <div className="flex flex-col gap-2">
-                {promptOptions.map((prompt) => (
+                {prompts.map((prompt) => (
                   <Checkbox key={prompt.prompt_id} value={prompt.prompt_id}>
                     {prompt.question}
                   </Checkbox>

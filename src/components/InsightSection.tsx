@@ -70,7 +70,7 @@ const InsightSection: React.FC = () => {
   };
 
   return (
-    <Card style={{ marginTop: 32 }} variant="borderless">
+    <Card className="shadow-lg rounded-2xl p-6 mx-auto mt-8 mb-16">
       <div ref={summaryRef} style={{ padding: "1rem" }}>
         <Title level={3} style={{ textAlign: "center" }}>
           Get Your Document Insights

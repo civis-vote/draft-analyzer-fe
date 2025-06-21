@@ -1,8 +1,7 @@
 import { Modal, Input, Button, Card, Checkbox } from 'antd';
 import { useEffect, useState } from 'react';
 import { DocumentType } from '@/model/DocumentModels';
-import { AssessmentArea } from '@/model/AssessmentAreaModel';
-import { getAssessmentAreas } from '@/services/prompt-dashboard/assessmentAreaService';
+import { useAssessmentAreaStore } from '@/store/assessmentAreaStore';
 
 interface Props {
   visible: boolean;
@@ -30,8 +29,6 @@ const DocumentTypeForm: React.FC<Props> = ({
     assessment_ids: [],
   });
 
-  const [assessmentOptions, setAssessmentOptions] = useState<AssessmentArea[]>([]);
-
   useEffect(() => {
     if (mode === 'edit' && initialData) {
       setFormData(initialData);
@@ -49,18 +46,19 @@ const DocumentTypeForm: React.FC<Props> = ({
     }
   }, [mode, initialData]);
 
-  useEffect(() => {
-    const fetchAssessments = async () => {
-      try {
-        const result = await getAssessmentAreas();
-        setAssessmentOptions(result);
-      } catch (error) {
-        console.error('Failed to fetch assessment areas:', error);
+  const {
+      assessmentAreas,
+      fetchAssessmentAreas,
+    } = useAssessmentAreaStore();
+  
+    // Fetch assessment areas on mount
+    useEffect(() => {
+      if (assessmentAreas.length === 0) {
+        fetchAssessmentAreas().catch((error) => {
+          console.error("Failed to load assessment areas:", error);
+        });
       }
-    };
-
-    fetchAssessments();
-  }, []);
+    }, []);
 
   const handleChange = (field: keyof DocumentType, value: any) => {
     setFormData({ ...formData, [field]: value });
@@ -105,7 +103,7 @@ const DocumentTypeForm: React.FC<Props> = ({
             onChange={(val) => handleChange('assessment_ids', val)}
           >
             <div className="flex flex-col gap-2">
-              {assessmentOptions.map((area) => (
+              {assessmentAreas.map((area) => (
                 <Checkbox key={area.assessment_id} value={area.assessment_id}>
                   {area.assessment_name}
                 </Checkbox>

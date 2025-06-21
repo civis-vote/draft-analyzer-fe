@@ -12,9 +12,8 @@ const formatFileSize = (sizeKb: number) => {
 const DocumentMetadataCard: React.FC<{ document: UploadResponse }> = ({ document }) => {
   return (
     <Card
-      title="📄 Document Metadata"
-      bordered
-      className="w-full max-w-5xl mx-auto mt-4 shadow-lg rounded-xl"
+      title="Uploaded Document Details"
+      className="w-full max-w-5xl mx-auto mt-4 shadow-lg rounded-xl text-center"
       headStyle={{ fontSize: "1.1rem", fontWeight: "bold" }}
     >
       <Descriptions

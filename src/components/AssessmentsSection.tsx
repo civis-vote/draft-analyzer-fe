@@ -30,17 +30,7 @@ const AssessmentModal: React.FC<{ documentType: DocumentType }> = ({ documentTyp
   if (error) return <div>{error}</div>;
 
   return (
-    <Card
-      className="shadow-md rounded-lg mb-8"
-      styles={{
-        body: {
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "left",
-          gap: "1.5rem",
-        },
-      }}
-    >
+    <Card className="w-full max-w-5xl mx-auto mt-4 shadow-lg rounded-xl">
       <div className="text-center">
         <Title level={3} style={{ margin: 0, color: "#1f2937" }}>
           Assessment Framework for {documentType.doc_type_name}
