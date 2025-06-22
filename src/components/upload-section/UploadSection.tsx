@@ -5,17 +5,16 @@ import {
   Typography,
   Card,
   Button,
-  Modal,
   message,
 } from "antd";
 import type { UploadProps } from "antd";
 import { CloudUploadOutlined } from "@ant-design/icons";
-import { createDocument, uploadDocument } from "@/services/documentService";
 import { useDocumentStore } from "@/store/documentStore";
 import AssessmentsSection from "@/components/AssessmentsSection";
 import { DocumentType, UploadResponse } from "@/model/DocumentModels";
 import DocumentMetadataCard from "./DocumentMetadataCard";
 import DocumentTypeSelector from "./DocumentTypeSelector";
+import { uploadDocument } from "@/services/documentService";
 
 const { Dragger } = Upload;
 const { Title, Paragraph, Text } = Typography;
@@ -42,7 +41,7 @@ export default function UploadSection() {
     setUploadProgress(0);
     setSummaryRequested(false);
     setSelectedDocType(null);
-
+    setError(null);
     const sessionId = "abc123"; // Replace with actual sessionId logic
     const userId = "user456"; // Replace with actual userId logic
     const documentName = file.name;
@@ -54,42 +53,10 @@ export default function UploadSection() {
         userId,
         documentName,
       });
-
-      if (res.warning && res.new_document) {
-        Modal.confirm({
-          title: "Document Already Exists",
-          content:
-            res.warning +
-            " Would you like to use the existing document or create a new one?",
-          okText: "Use Existing",
-          cancelText: "Create New",
-          onOk: () => {
-            setUploadResponse(res); // Use existing document
-            setShowSummarize(true);
-          },
-          onCancel: async () => {
-            try {
-              if (!res.new_document) {
-                throw new Error("No new uploaded document found.");
-              }
-              const created = await createDocument(res.new_document); // Call create API with new document
-              setUploadResponse(created);
-              setShowSummarize(true);
-            } catch (e) {
-              const errorMessage =
-                e instanceof Error
-                  ? e.message
-                  : "Failed to create new document.";
-              setError(errorMessage);
-              message.error(errorMessage);
-              resetUpload();
-            }
-          },
-        });
-      } else {
-        setUploadResponse(res);
-        setShowSummarize(true);
-      }
+      message.success("File uploaded successfully");
+      setUploadResponse(res);
+      setShowSummarize(true);
+      
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Upload failed";
       setError(errorMessage);
@@ -105,14 +72,6 @@ export default function UploadSection() {
     if (summarySection) {
       summarySection.scrollIntoView({ behavior: "smooth" });
     }
-  };
-
-  const resetUpload = () => {
-    setUploadedFile(null);
-    setShowSummarize(false);
-    setUploadProgress(0);
-    setSelectedDocType(null);
-    setSummaryRequested(false);
   };
 
   const props: UploadProps = {

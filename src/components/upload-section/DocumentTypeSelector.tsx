@@ -1,7 +1,7 @@
-import { Select, Typography, Spin } from "antd";
+import { Select, Typography, Spin, message } from "antd";
 import { DocumentType } from "@/model/DocumentModels";
 import { useEffect, useState } from "react";
-import { getDocumentTypes } from "@/services/documentService";
+import { useDocumentTypeStore } from "@/store/documentStore";
 
 const { Option } = Select;
 const { Text } = Typography;
@@ -11,30 +11,27 @@ interface Props {
 }
 
 const DocumentTypeSelector: React.FC<Props> = ({ onSelect }) => {
-  const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
-  const [isLoadingTypes, setIsLoadingTypes] = useState(false);
   const [selected, setSelected] = useState<DocumentType | undefined>(undefined);
 
-  useEffect(() => {
-    loadDocumentTypes();
-  }, []);
+  const {
+      documentTypes,
+      documentTypesLoading,
+      fetchDocumentTypes,
+    } = useDocumentTypeStore();
 
-  const loadDocumentTypes = async () => {
-    setIsLoadingTypes(true);
-    try {
-      const types = await getDocumentTypes();
-      setDocumentTypes(types);
-    } catch (error) {
-      console.error("Failed to load document types:", error);
-    } finally {
-      setIsLoadingTypes(false);
-    }
-  };
+    // Fetch document types on mount
+    useEffect(() => {
+      if (documentTypes.length === 0) {
+        fetchDocumentTypes().catch(() => {
+          message.error('Failed to load document types');
+        });
+      }
+    }, []);
 
   return (
     <div className="w-full max-w-sm mt-6">
       <Text strong>Select Document Type:</Text>
-      {isLoadingTypes ? (
+      {documentTypesLoading ? (
         <Spin style={{ display: "block", marginTop: 12 }} />
       ) : (
         <Select

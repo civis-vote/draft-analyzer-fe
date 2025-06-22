@@ -15,6 +15,7 @@ interface AssessmentAreaStore {
   addAssessmentArea: (area: AssessmentArea) => Promise<void>;
   updateAssessmentAreaById: (area: AssessmentArea) => Promise<void>;
   deleteAssessmentAreaById: (id: number) => Promise<void>;
+  getAssessmentAreaById(item: number): AssessmentArea | undefined;
 }
 
 export const useAssessmentAreaStore = create<AssessmentAreaStore>((set, get) => ({
@@ -56,4 +57,9 @@ export const useAssessmentAreaStore = create<AssessmentAreaStore>((set, get) => 
       assessmentAreas: state.assessmentAreas.filter((a) => a.assessment_id !== id),
     }));
   },
+
+  getAssessmentAreaById: (id) => {
+    return get().assessmentAreas.find((area) => area.assessment_id === id);
+  }
+
 }));

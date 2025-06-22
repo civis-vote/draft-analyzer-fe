@@ -24,3 +24,9 @@ export const updateAssessmentArea = async (area: Partial<AssessmentArea>): Promi
 export const deleteAssessmentArea = async (id: number): Promise<void> => {
   await axios.delete(`${BASE_URL}/assessment_areas/${id}`);
 };
+
+export const getAssessmentAreaById = async (id: number): Promise<AssessmentArea> => {
+  const response = await axios.get(`${BASE_URL}/assessment_areas/${id}`);
+  return response.data;
+};
+

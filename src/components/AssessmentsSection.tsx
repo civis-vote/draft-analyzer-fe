@@ -1,33 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import AssessmentFramework from './AssessmentFramework';
-import { getAssessmentsByDocumentType } from '@/services/documentService';
-import Paragraph from 'antd/es/typography/Paragraph';
-import Title from 'antd/es/typography/Title';
-import { Card } from 'antd';
-import { Assessment, DocumentType } from '@/model/DocumentModels';
+import AssessmentFramework from "./AssessmentFramework";
+import Paragraph from "antd/es/typography/Paragraph";
+import Title from "antd/es/typography/Title";
+import { DocumentType } from "@/model/DocumentModels";
+import { useAssessmentAreaStore } from "@/store/assessmentAreaStore";
+import { Card, message } from "antd";
+import { useEffect } from "react";
 
-const AssessmentModal: React.FC<{ documentType: DocumentType }> = ({ documentType }) => {
-  const [assessmentData, setAssessmentData] = useState<Assessment[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+const AssessmentModal: React.FC<{ documentType: DocumentType }> = ({
+  documentType,
+}) => {
+  const { assessmentAreas, fetchAssessmentAreas, getAssessmentAreaById } =
+    useAssessmentAreaStore();
 
+  // Fetch assessment areas on mount
   useEffect(() => {
-    const fetchAssessments = async () => {
-      try {
-        const data = await getAssessmentsByDocumentType(documentType.doc_type_id);
-        setAssessmentData(data);
-      } catch (err) {
-        setError('Failed to fetch assessments');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAssessments();
-  }, [documentType.doc_type_id]);
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+    if (assessmentAreas.length === 0) {
+      fetchAssessmentAreas().catch(() => {
+        message.error("Failed to load assessment areas");
+      });
+    }
+  }, []);
 
   return (
     <Card className="w-full max-w-5xl mx-auto mt-4 shadow-lg rounded-xl">
@@ -36,12 +28,20 @@ const AssessmentModal: React.FC<{ documentType: DocumentType }> = ({ documentTyp
           Assessment Framework for {documentType.doc_type_name}
         </Title>
         <Paragraph type="secondary">
-          This framework outlines the key assessments for the {documentType.doc_type_name} document type.
+          This framework outlines the key assessments for the{" "}
+          {documentType.doc_type_name} document type.
         </Paragraph>
       </div>
-      {assessmentData.map((item, index) => (
-        <AssessmentFramework key={index} assessment={item} index={index + 1} />
-      ))}
+      {(documentType.assessment_ids ?? []).map((item, index) => {
+        const assessment = getAssessmentAreaById(item);
+        return assessment ? (
+          <AssessmentFramework
+            key={index}
+            assessment={assessment}
+            index={index + 1}
+          />
+        ) : null;
+      })}
     </Card>
   );
 };

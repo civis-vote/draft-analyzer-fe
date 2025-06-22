@@ -3,7 +3,7 @@ import { UploadResponse, SummaryRequest, SummaryResponse, DocumentType, Assessme
 import { EvaluationResponse, EvaluationRequest } from "@/model/EvaluationModels";
 import { ScoreAnalysisRequest, ScoreAnalysisResponse } from "@/model/ScoreAnalysisModels";
 
-const BASE_URL = "http://localhost:9000";
+const BASE_URL = "http://localhost:8000/api";
 
 export const uploadDocument = async (request: UploadRequest): Promise<UploadResponse> => {
   const formData = new FormData();
@@ -16,6 +16,7 @@ export const uploadDocument = async (request: UploadRequest): Promise<UploadResp
 
   if (!response.ok) {
     const error = await response.text();
+    console.error("Upload failed:", error);
     throw new Error(error || "Upload failed");
   }
 

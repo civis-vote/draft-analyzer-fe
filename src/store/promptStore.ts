@@ -16,6 +16,7 @@ interface PromptStore {
   addPrompt: (prompt: Prompt) => Promise<void>;
   updatePromptById: (prompt: Prompt) => Promise<void>;
   deletePromptById: (id: number) => Promise<void>;
+  getPromptById(prompt_id: number): Prompt | undefined;
 }
 
 export const usePromptStore = create<PromptStore>((set, get) => ({
@@ -57,4 +58,9 @@ export const usePromptStore = create<PromptStore>((set, get) => ({
       prompts: state.prompts.filter((p) => p.prompt_id !== id),
     }));
   },
+
+  getPromptById: (id: number) => {
+    return get().prompts.find((p) => p.prompt_id === id);
+  },
+
 }));
