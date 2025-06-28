@@ -1,4 +1,4 @@
-import { Modal, Input, Button, Card, Checkbox } from 'antd';
+import { Modal, Input, Button, Select } from 'antd';
 import { useEffect, useState } from 'react';
 import { DocumentType } from '@/model/DocumentModels';
 import { useAssessmentAreaStore } from '@/store/assessmentAreaStore';
@@ -22,12 +22,25 @@ const DocumentTypeForm: React.FC<Props> = ({
     doc_type_id: 0,
     doc_type_name: '',
     description: '',
-    created_by: 'Admin',
-    created_on: '',
     updated_by: '',
     updated_on: '',
     assessment_ids: [],
   });
+  const { assessmentAreas, fetchAssessmentAreas, assessmentAreasLoading } = useAssessmentAreaStore();
+  const [assessmentOptions, setAssessmentOptions] = useState<{label: string, value: number}[]>([]);
+
+  useEffect(() => {
+    fetchAssessmentAreas();
+  }, [fetchAssessmentAreas]);
+
+  useEffect(() => {
+    setAssessmentOptions(
+      (assessmentAreas || []).map((area) => ({
+        label: area.assessment_name || area.name || 'Unnamed',
+        value: area.assessment_id as number,
+      }))
+    );
+  }, [assessmentAreas]);
 
   useEffect(() => {
     if (mode === 'edit' && initialData) {
@@ -37,8 +50,6 @@ const DocumentTypeForm: React.FC<Props> = ({
         doc_type_id: 0,
         doc_type_name: '',
         description: '',
-        created_by: 'Admin',
-        created_on: '',
         updated_by: '',
         updated_on: '',
         assessment_ids: [],
@@ -46,26 +57,16 @@ const DocumentTypeForm: React.FC<Props> = ({
     }
   }, [mode, initialData]);
 
-  const {
-      assessmentAreas,
-      fetchAssessmentAreas,
-    } = useAssessmentAreaStore();
-  
-    // Fetch assessment areas on mount
-    useEffect(() => {
-      if (assessmentAreas.length === 0) {
-        fetchAssessmentAreas().catch((error) => {
-          console.error("Failed to load assessment areas:", error);
-        });
-      }
-    }, []);
-
-  const handleChange = (field: keyof DocumentType, value: any) => {
+  const handleChange = (field: keyof DocumentType, value: unknown) => {
     setFormData({ ...formData, [field]: value });
   };
 
   const handleSubmit = () => {
-    onSubmit(formData);
+    const payload = {
+      ...formData,
+      assessments: formData.assessment_ids || [],
+    };
+    onSubmit(payload);
     onClose();
   };
 
@@ -96,23 +97,18 @@ const DocumentTypeForm: React.FC<Props> = ({
         </div>
 
         <div>
-        <label className="block font-medium mb-2">Link Assessment Areas</label>
-        <Card className="border rounded-lg p-4 max-h-48 overflow-y-auto">
-          <Checkbox.Group
-            value={formData.assessment_ids || []}
+          <label className="block font-medium mb-2">Link Assessment Areas</label>
+          <Select
+            mode="multiple"
+            allowClear
+            style={{ width: '100%' }}
+            placeholder={assessmentAreasLoading ? 'Loading...' : 'Select assessment areas'}
+            value={formData.assessment_ids}
             onChange={(val) => handleChange('assessment_ids', val)}
-          >
-            <div className="flex flex-col gap-2">
-              {assessmentAreas.map((area) => (
-                <Checkbox key={area.assessment_id} value={area.assessment_id}>
-                  {area.assessment_name}
-                </Checkbox>
-              ))}
-            </div>
-          </Checkbox.Group>
-        </Card>
-      </div>
-
+            options={assessmentOptions}
+            loading={assessmentAreasLoading}
+          />
+        </div>
 
         <div className="flex justify-end gap-2 mt-4">
           <Button onClick={onClose}>Cancel</Button>

@@ -127,6 +127,27 @@ const assessmentPrompts = [
   },
 ];
 
+const assessmentAreas = [
+  {
+    assessment_id: 1,
+    name: 'Clarity',
+    description: 'Clarity of the document',
+    created_by: 'Admin',
+    created_on: '2025-06-07T17:46:44.022931',
+    updated_by: null,
+    updated_on: '2025-06-07T17:46:44.022931'
+  },
+  {
+    assessment_id: 2,
+    name: 'Impact',
+    description: 'Impact assessment',
+    created_by: 'Admin',
+    created_on: '2025-06-07T17:48:32.073516',
+    updated_by: null,
+    updated_on: '2025-06-07T17:48:32.073516'
+  }
+];
+
 uploaded_document = {
       "doc_id": "feee3807cadc5677d4fd630076e876a369253b1b39140f8caf6c256f370214bf_2",
       "file_name": "New Draft File.pdf",
@@ -138,5 +159,6 @@ uploaded_document = {
 module.exports = {
   documentTypes,
   assessmentPrompts,
-  uploaded_document
+  uploaded_document,
+  assessmentAreas
 };

@@ -83,8 +83,8 @@ const AssessmentAreas = () => {
   const columns = [
     {
       title: "Name",
-      dataIndex: "assessment_name",
-      key: "assessment_name",
+      dataIndex: "name", // changed from assessment_name to name
+      key: "name",
     },
     {
       title: "Description",
@@ -95,11 +95,14 @@ const AssessmentAreas = () => {
       title: "Created By",
       dataIndex: "created_by",
       key: "created_by",
+      render: (value: string | undefined) => value || "Admin",
     },
     {
       title: "Created On",
       dataIndex: "created_on",
       key: "created_on",
+      render: (value: string | undefined) =>
+        value ? new Date(value).toISOString() : "N/A",
     },
     {
       title: "Actions",
@@ -174,7 +177,7 @@ const AssessmentAreas = () => {
         <Table
           columns={columns}
           dataSource={assessmentAreas.filter((d) =>
-            d.assessment_name?.toLowerCase().includes(search.toLowerCase())
+            d.name?.toLowerCase().includes(search.toLowerCase())
           )}
           rowKey="assessment_id"
           pagination={false}
