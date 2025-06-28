@@ -95,11 +95,14 @@ const DocumentTypes = () => {
       title: 'Created By',
       dataIndex: 'created_by',
       key: 'created_by',
+      render: (value: string | undefined) => value || 'Admin',
     },
     {
       title: 'Created On',
       dataIndex: 'created_on',
       key: 'created_on',
+      render: (value: string | undefined) =>
+        value ? new Date(value).toISOString() : 'N/A',
     },
     {
       title: 'Actions',

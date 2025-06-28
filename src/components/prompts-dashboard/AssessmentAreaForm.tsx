@@ -1,4 +1,4 @@
-import { Modal, Input, Button, Card, Checkbox } from 'antd';
+import { Modal, Input, Button, Select } from 'antd';
 import { useEffect, useState } from 'react';
 import { AssessmentArea } from '@/model/AssessmentAreaModel';
 import { usePromptStore } from '@/store/promptStore';
@@ -22,25 +22,27 @@ const AssessmentAreaForm: React.FC<Props> = ({
     assessment_id: 0,
     assessment_name: '',
     description: '',
-    created_by: '',
     created_on: '',
-    updated_by: '',
     updated_on: '',
     prompt_ids: [],
   });
-    const {
-      prompts,
-      fetchPrompts,
-    } = usePromptStore();
-  
-    // Fetch prompts on mount
-    useEffect(() => {
-      if (prompts.length === 0) {
-        fetchPrompts().catch((error) => {
-          console.error('Failed to fetch prompts:', error);
-        });
-      }
-    }, []);
+  const { prompts, fetchPrompts } = usePromptStore();
+  const [promptOptions, setPromptOptions] = useState<{label: string, value: number}[]>([]);
+
+  useEffect(() => {
+    fetchPrompts();
+  }, [fetchPrompts]);
+
+  useEffect(() => {
+    setPromptOptions(
+      (prompts || [])
+        .filter((prompt) => typeof prompt.prompt_id === 'number')
+        .map((prompt) => ({
+          label: prompt.question || 'Unnamed',
+          value: prompt.prompt_id as number,
+        }))
+    );
+  }, [prompts]);
 
   useEffect(() => {
     if (mode === 'edit' && initialData) {
@@ -49,13 +51,13 @@ const AssessmentAreaForm: React.FC<Props> = ({
       setFormData({
         assessment_name: '',
         description: '',
-        created_by: '',
-        updated_by: '',
+        created_on: '',
+        updated_on: '',
         prompt_ids: [],
       } as AssessmentArea);
     }
   }, [mode, initialData]);
-  
+
   const handleChange = (field: keyof AssessmentArea, value: string | number[]) => {
     setFormData({ ...formData, [field]: value });
   };
@@ -92,37 +94,16 @@ const AssessmentAreaForm: React.FC<Props> = ({
         </div>
 
         <div>
-          <label className="block font-medium">Created By</label>
-          <Input
-            value={formData.created_by}
-            onChange={(e) => handleChange('created_by', e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label className="block font-medium">Updated By</label>
-          <Input
-            value={formData.updated_by}
-            onChange={(e) => handleChange('updated_by', e.target.value)}
-          />
-        </div>
-
-        <div>
           <label className="block font-medium mb-2">Link Prompts</label>
-          <Card className="border rounded-lg p-4 max-h-48 overflow-y-auto">
-            <Checkbox.Group
-              value={formData.prompt_ids || []}
-              onChange={(val) => handleChange('prompt_ids', val)}
-            >
-              <div className="flex flex-col gap-2">
-                {prompts.map((prompt) => (
-                  <Checkbox key={prompt.prompt_id} value={prompt.prompt_id}>
-                    {prompt.question}
-                  </Checkbox>
-                ))}
-              </div>
-            </Checkbox.Group>
-          </Card>
+          <Select
+            mode="multiple"
+            allowClear
+            style={{ width: '100%' }}
+            placeholder={'Select prompts'}
+            value={formData.prompt_ids || []}
+            onChange={(val) => handleChange('prompt_ids', val)}
+            options={promptOptions}
+          />
         </div>
 
         <div className="flex justify-end gap-2 mt-4">

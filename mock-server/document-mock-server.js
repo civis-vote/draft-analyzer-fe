@@ -1,10 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
-const { documentTypes, assessmentPrompts, uploaded_document } = require('./document-types');
+const { documentTypes, assessmentPrompts, uploaded_document, assessmentAreas } = require('./document-types');
 
 const app = express();
-const PORT = 9000;
+const PORT = 8000;
 
 app.use(cors());
 app.use(express.json());
@@ -14,7 +14,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // Upload Endpoint
-app.post('/upload_policy', upload.single('file'), (req, res) => {
+app.post('/api/upload_policy', upload.single('file'), (req, res) => {
   const file = req.file;
 
   if (!file) return res.status(400).json({ error: 'File is required' });
@@ -40,7 +40,7 @@ app.post('/upload_policy', upload.single('file'), (req, res) => {
 });
 
 // Create Document Endpoint
-app.post('/create_document', (req, res) => {
+app.post('/api/create_document', (req, res) => {
   const newDocument = req.body;
   if (!newDocument) return res.status(400).json({ error: "Document data is required" });
 
@@ -50,9 +50,9 @@ app.post('/create_document', (req, res) => {
 });
 
 // Summarize Endpoint
-app.post('/summarize', (req, res) => {
+app.post('/api/summarize', (req, res) => {
   const { docId } = req.body;
-  if (!docId) return res.status(400).json({ error: "docId is required" });
+  // if (!docId) return res.status(400).json({ error: "docId is required" });
 
   setTimeout(() => {
     // if (Math.random() < 0.2) {
@@ -73,7 +73,7 @@ app.post('/summarize', (req, res) => {
   }, 2000); // 2 sec delay
 });
 
-app.post('/evaluations', (req, res) => {
+app.post('/api/evaluations', (req, res) => {
   const { docId } = req.body;
 
   // Simulate delay
@@ -109,7 +109,7 @@ app.post('/evaluations', (req, res) => {
   }, 1500);
 });
 
-app.post('/score', (req, res) => {
+app.post('/api/score', (req, res) => {
   const { docId } = req.body;
 
   setTimeout(() => {
@@ -141,18 +141,18 @@ app.post('/score', (req, res) => {
 });
 
 // Document type endpoints
-app.get('/document_types', (req, res) => {
+app.get('/api/document_types', (req, res) => {
   res.json(documentTypes);
 });
 
-app.get('/document_types/:typeId/assessments', (req, res) => {
+app.get('/api/document_types/:typeId/assessments', (req, res) => {
   const { typeId } = req.params;
   //const typeAssessments = assessmentPrompts[typeId] || [];
   res.json(assessmentPrompts);
 });
 
 // Get prompts for a specific assessment
-app.get('/assessments/:assessmentId/prompts', (req, res) => {
+app.get('/api/assessments/:assessmentId/prompts', (req, res) => {
   const { assessmentId } = req.params;
   let prompts = [];
 
@@ -165,6 +165,107 @@ app.get('/assessments/:assessmentId/prompts', (req, res) => {
   });
 
   res.json(prompts);
+});
+
+// Assessment Areas endpoints
+app.get('/api/assessment_areas', (req, res) => {
+  // Return a mock list of assessment areas
+  res.json(assessmentAreas);
+});
+
+app.get('/api/assessment_areas/:id', (req, res) => {
+  // Return a single mock assessment area
+  res.json({
+    assessment_id: Number(req.params.id),
+    name: 'Clarity',
+    description: 'Clarity of the document',
+    created_by: 'Admin',
+    created_on: new Date().toISOString(),
+    updated_by: null,
+    updated_on: null
+  });
+});
+
+// Document Types CRUD
+app.post('/api/document_types', (req, res) => {
+  const doc = req.body;
+  doc.doc_type_id = Math.floor(Math.random() * 10000);
+  // Accept and echo back assessments array if provided
+  doc.assessments = doc.assessments || [];
+  res.json(doc);
+});
+app.put('/api/document_types/:id', (req, res) => {
+  const doc = req.body;
+  doc.doc_type_id = Number(req.params.id);
+  // Accept and echo back assessments array if provided
+  doc.assessments = doc.assessments || [];
+  res.json(doc);
+});
+app.delete('/api/document_types/:id', (req, res) => {
+  res.status(204).send();
+});
+
+// Assessment Areas CRUD
+app.post('/api/assessment_areas', (req, res) => {
+  const area = req.body;
+  area.assessment_id = Math.floor(Math.random() * 10000);
+  res.json(area);
+});
+app.put('/api/assessment_areas/:id', (req, res) => {
+  const area = req.body;
+  area.assessment_id = Number(req.params.id);
+  res.json(area);
+});
+app.delete('/api/assessment_areas/:id', (req, res) => {
+  res.status(204).send();
+});
+
+// Prompts CRUD
+app.post('/api/prompt', (req, res) => {
+  const prompt = req.body;
+  prompt.prompt_id = Math.floor(Math.random() * 10000);
+  res.json(prompt);
+});
+app.put('/api/prompt/:id', (req, res) => {
+  const prompt = req.body;
+  prompt.prompt_id = Number(req.params.id);
+  res.json(prompt);
+});
+app.delete('/api/prompt/:id', (req, res) => {
+  res.status(204).send();
+});
+app.get('/api/prompt/:id', (req, res) => {
+  res.json({
+    prompt_id: Number(req.params.id),
+    question: 'Is the policy clear?',
+    category: 'Clarity',
+    created_by: 'Admin',
+    created_on: new Date().toISOString(),
+    updated_by: null,
+    updated_on: null
+  });
+});
+app.get('/api/prompt', (req, res) => {
+  res.json([
+    {
+      prompt_id: 1,
+      criteria: 'Clarity',
+      question: 'Is the policy clear?',
+      created_by: 'Admin',
+      created_on: new Date().toISOString(),
+      updated_by: null,
+      updated_on: null
+    },
+    {
+      prompt_id: 2,
+      criteria: 'Impact',
+      question: 'Does the policy address impact?',
+      created_by: 'Admin',
+      created_on: new Date().toISOString(),
+      updated_by: null,
+      updated_on: null
+    }
+  ]);
 });
 
 app.listen(PORT, () => {
