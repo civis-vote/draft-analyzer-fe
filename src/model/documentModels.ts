@@ -14,8 +14,6 @@ export interface UploadResponse {
   file_type: string;
   number_of_pages: number;
   doc_size_kb: number;
-  warning?: string | null;
-  new_document?: UploadResponse | null;
 }
 
 // Summarize request
@@ -25,8 +23,9 @@ export interface SummaryRequest {
 
 // Summarize response (used in InsightSection)
 export interface SummaryResponse {
-  summaryPoints: string[];
-  summaryText: string;
+  doc_summary_id: number;
+  document_id: string;
+  summary_text: string;
 }
 
 export interface DocumentType {

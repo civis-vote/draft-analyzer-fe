@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { AssessmentArea } from '@/model/AssessmentAreaModel';
 
-const BASE_URL = 'http://127.0.0.1:8000/api';
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const getAssessmentAreas = async (): Promise<AssessmentArea[]> => {
   const response = await axios.get<AssessmentArea[]>(`${BASE_URL}/assessment_areas`);

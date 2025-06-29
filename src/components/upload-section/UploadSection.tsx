@@ -1,11 +1,11 @@
 import { useState } from "react";
 import {
   Upload,
-  Progress,
   Typography,
   Card,
   Button,
   message,
+  Spin,
 } from "antd";
 import type { UploadProps } from "antd";
 import { CloudUploadOutlined } from "@ant-design/icons";
@@ -82,7 +82,7 @@ export default function UploadSection() {
       return false;
     },
     showUploadList: false,
-    accept: ".pdf,.doc,.docx,.txt",
+    accept: ".pdf,.docx",
   };
 
   return (
@@ -110,14 +110,15 @@ export default function UploadSection() {
             Click or drag file to this area to upload
           </p>
           <p className="ant-upload-hint text-gray-500 text-sm">
-            Supported formats: .pdf, .doc, .docx, .txt
+            Supported formats: .pdf, .docx,
           </p>
         </Dragger>
       </div>
 
       {isUploading && (
-        <div className="w-11/12 mt-4">
-          <Progress percent={uploadProgress} status="active" />
+        <div className="w-11/12 mt-4 flex items-center space-x-3">
+          <Spin />
+          <span className="text-sm text-gray-700">Uploading document... Please wait</span>
         </div>
       )}
 
