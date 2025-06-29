@@ -5,16 +5,14 @@ import {
   Button,
   Spin,
   message,
-  Space,
 } from "antd";
 import {
-  CheckCircleTwoTone,
   FileTextOutlined,
   DownloadOutlined,
 } from "@ant-design/icons";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { fetchSummary } from "@/services/documentService";
+import { summarizeDocument } from "@/services/documentService";
 import { useDocumentStore } from "@/store/documentStore";
 import { SummaryResponse } from "@/model/DocumentModels";
 
@@ -40,7 +38,7 @@ const InsightSection: React.FC = () => {
           setLoading(false);
           return;
         }
-        const response = await fetchSummary({ doc_id: docId });
+        const response = await summarizeDocument({ doc_id: docId });
         setSummaryData(response);
       } catch (err) {
         message.error("Failed to fetch summary.");
@@ -97,27 +95,6 @@ const InsightSection: React.FC = () => {
               Document Summary
             </Title>
 
-            {summaryData.summaryPoints && (
-              <Space direction="vertical" style={{ width: "100%", padding: "8px 0" }}>
-                {summaryData.summaryPoints.map((point, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: "flex",
-                      alignItems: "start",
-                      gap: "8px",
-                    }}
-                  >
-                    <CheckCircleTwoTone
-                      twoToneColor="#52c41a"
-                      style={{ marginTop: 4 }}
-                    />
-                    <Paragraph style={{ margin: 0 }}>{point}</Paragraph>
-                  </div>
-                ))}
-              </Space>
-            )}
-
             <Card
               size="small"
               style={{
@@ -127,9 +104,10 @@ const InsightSection: React.FC = () => {
                 borderRadius: 8,
               }}
             >
-              <Paragraph style={{ marginBottom: 0, whiteSpace: "pre-wrap" }}>
-                {summaryData.summaryText}
-              </Paragraph>
+              <div
+                className="prose prose-base max-w-none text-gray-800"
+                dangerouslySetInnerHTML={{ __html: summaryData.summary_text }}
+              />
             </Card>
           </div>
         ) : (

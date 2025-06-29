@@ -3,7 +3,7 @@ import { UploadResponse, SummaryRequest, SummaryResponse, DocumentType, Assessme
 import { EvaluationResponse, EvaluationRequest } from "@/model/EvaluationModels";
 import { ScoreAnalysisRequest, ScoreAnalysisResponse } from "@/model/ScoreAnalysisModels";
 
-const BASE_URL = "http://localhost:8000/api";
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const uploadDocument = async (request: UploadRequest): Promise<UploadResponse> => {
   const formData = new FormData();
@@ -27,8 +27,8 @@ export const createDocument = async (newDocument: UploadResponse): Promise<Uploa
   return response.data;
 };
 
-export const fetchSummary = async (request: SummaryRequest): Promise<SummaryResponse> => {
-  const response = await axios.post<SummaryResponse>(`${BASE_URL}/summarize`, request);
+export const summarizeDocument = async (request: SummaryRequest): Promise<SummaryResponse> => {
+  const response = await axios.get<SummaryResponse>(`${BASE_URL}/summarize/${request.doc_id}`);
   return response.data;
 };
 

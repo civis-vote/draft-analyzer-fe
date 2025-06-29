@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Prompt } from '@/model/PromptModel';
 
-const BASE_URL = 'http://127.0.0.1:8000/api';
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const getPrompts = async (): Promise<Prompt[]> => {
   const response = await axios.get(`${BASE_URL}/prompt`);

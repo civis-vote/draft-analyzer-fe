@@ -38,7 +38,7 @@ const PromptEvaluation: React.FC = () => {
   return (
     <Card className="shadow-lg rounded-2xl p-6 mx-auto mt-8 mb-16">
       <Title level={3} style={{ textAlign: "center" }}>
-        Evaluation by Prompts
+        Evaluation by Assessment Areas
       </Title>
       <Paragraph
         type="secondary"

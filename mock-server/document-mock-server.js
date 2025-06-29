@@ -1,7 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
-const { documentTypes, assessmentPrompts, uploaded_document } = require('./document-types');
+const {
+  prompts,
+  assessmentAreas,
+  assessmentAreaPrompt,
+  documentTypes,
+  documentTypeAssessmentArea,
+  documentMetadata,
+} = require('./mock-data.ts');
 
 const app = express();
 const PORT = 9000;
@@ -34,7 +41,6 @@ app.post('/upload_policy', upload.single('file'), (req, res) => {
       "number_of_pages": 12,
       "doc_size_kb": 568,
       warning,
-      new_document: uploaded_document
     });
   }, 100); // 1 sec delay
 });
@@ -50,25 +56,46 @@ app.post('/create_document', (req, res) => {
 });
 
 // Summarize Endpoint
-app.post('/summarize', (req, res) => {
-  const { docId } = req.body;
-  if (!docId) return res.status(400).json({ error: "docId is required" });
+app.get('/summarize/:document_id', (req, res) => {
+  const document_id = req.params.document_id;
+  if (!document_id) return res.status(400).json({ error: "document_id is required" });
 
   setTimeout(() => {
-    // if (Math.random() < 0.2) {
-    //   return res.status(500).json({ error: "Summarization failed. Try again later." });
-    // }
 
     res.json({
-      summaryPoints: [
-        "Reducing carbon emissions by 40% by 2035",
-        "Implementing green building standards",
-        "Expanding public transportation networks",
-        "Creating community green spaces near residential areas",
-        "Developing water conservation infrastructure"
-      ],
-      summaryText:
-        "This mock summary shows key goals and implementation phases. It emphasizes inclusiveness, equity, and infrastructure development phased over time.",
+      doc_summary_id: 1,
+      document_id: document_id,
+      summary_text:
+        `
+          <h2>Odisha State Data Policy – 2024 Summary</h2>
+          <p>The Odisha State Data Policy for 2024 outlines several critical components:</p>
+
+          <ol>
+            <li><strong>Requirements, Commercial Use, and Restrictions:</strong> 
+              This document sets the foundational requirements for data usage in various sectors.
+            </li>
+
+            <li><strong>User Feedback and Collaboration:</strong> 
+              Encourages user engagement through feedback mechanisms, allowing public and relevant stakeholders to suggest improvements via forums or platforms.
+            </li>
+
+            <li><strong>Data Transparency and Open Data Initiatives:</strong> 
+              Supports transparency by publishing government data and ensuring open access for users.
+            </li>
+
+            <li><strong>Feedback Loop for OSDP:</strong> 
+              Features a feedback mechanism with a sample form accessible via OCAC's web portal, aiming to refine the policy through constructive suggestions.
+            </li>
+
+            <li><strong>Data Protection Components:</strong> 
+              Includes sections on data destruction, preservation, security, and usage, emphasizing the importance of permanent deletion in secure environments.
+            </li>
+          </ol>
+
+          <p>This summary highlights key areas such as user feedback, data transparency, and data protection mechanisms.</p>
+        
+        
+          `
     });
   }, 2000); // 2 sec delay
 });
@@ -140,31 +167,106 @@ app.post('/score', (req, res) => {
   }, 1500);
 });
 
-// Document type endpoints
-app.get('/document_types', (req, res) => {
-  res.json(documentTypes);
+// ---------- DOCUMENT TYPES ----------
+app.get('/document_types', (_req, res) => res.json(documentTypes));
+
+app.get('/document_types/:id', (req, res) => {
+  const type = documentTypes.find(t => t.doc_type_id === parseInt(req.params.id));
+  type ? res.json(type) : res.status(404).send('Document type not found');
+});
+
+app.post('/document_types', (req, res) => {
+  const newType = req.body;
+  documentTypes.push(newType);
+  res.status(201).json(newType);
+});
+
+app.put('/document_types/:id', (req, res) => {
+  const index = documentTypes.findIndex(t => t.doc_type_id === parseInt(req.params.id));
+  if (index === -1) return res.status(404).send('Document type not found');
+  documentTypes[index] = req.body;
+  res.json(documentTypes[index]);
+});
+
+app.delete('/document_types/:id', (req, res) => {
+  const index = documentTypes.findIndex(t => t.doc_type_id === parseInt(req.params.id));
+  if (index === -1) return res.status(404).send('Document type not found');
+  const removed = documentTypes.splice(index, 1);
+  res.json(removed[0]);
 });
 
 app.get('/document_types/:typeId/assessments', (req, res) => {
-  const { typeId } = req.params;
-  //const typeAssessments = assessmentPrompts[typeId] || [];
-  res.json(assessmentPrompts);
+  const typeId = parseInt(req.params.typeId);
+  const assessments = documentTypeAssessmentArea
+    .filter(rel => rel.doc_type_id === typeId)
+    .map(rel => assessmentAreas.find(a => a.assessment_id === rel.assessment_id))
+    .filter(Boolean);
+  res.json(assessments);
 });
 
-// Get prompts for a specific assessment
-app.get('/assessments/:assessmentId/prompts', (req, res) => {
-  const { assessmentId } = req.params;
-  let prompts = [];
+// ---------- PROMPTS ----------
+app.get('/prompt', (_req, res) => res.json(prompts));
 
-  // Search through all document types for the assessment
-  Object.values(assessmentPrompts).forEach(assessments => {
-    const assessment = assessments.find(a => a.id === parseInt(assessmentId));
-    if (assessment) {
-      prompts = assessment.prompts;
-    }
-  });
+app.get('/prompt/:id', (req, res) => {
+  const prompt = prompts.find(p => p.prompt_id === parseInt(req.params.id));
+  prompt ? res.json(prompt) : res.status(404).send('Prompt not found');
+});
 
-  res.json(prompts);
+app.post('/prompt', (req, res) => {
+  const newPrompt = req.body;
+  prompts.push(newPrompt);
+  res.status(201).json(newPrompt);
+});
+
+app.put('/prompt/:id', (req, res) => {
+  const index = prompts.findIndex(p => p.prompt_id === parseInt(req.params.id));
+  if (index === -1) return res.status(404).send('Prompt not found');
+  prompts[index] = req.body;
+  res.json(prompts[index]);
+});
+
+app.delete('/prompt/:id', (req, res) => {
+  const index = prompts.findIndex(p => p.prompt_id === parseInt(req.params.id));
+  if (index === -1) return res.status(404).send('Prompt not found');
+  const removed = prompts.splice(index, 1);
+  res.json(removed[0]);
+});
+
+// ---------- ASSESSMENT AREAS ----------
+app.get('/assessment_areas', (_req, res) => res.json(assessmentAreas));
+
+app.get('/assessment_areas/:id', (req, res) => {
+  const area = assessmentAreas.find(a => a.assessment_id === parseInt(req.params.id));
+  area ? res.json(area) : res.status(404).send('Assessment area not found');
+});
+
+app.post('/assessment_areas', (req, res) => {
+  const newArea = req.body;
+  assessmentAreas.push(newArea);
+  res.status(201).json(newArea);
+});
+
+app.put('/assessment_areas/:id', (req, res) => {
+  const index = assessmentAreas.findIndex(a => a.assessment_id === parseInt(req.params.id));
+  if (index === -1) return res.status(404).send('Assessment area not found');
+  assessmentAreas[index] = req.body;
+  res.json(assessmentAreas[index]);
+});
+
+app.delete('/assessment_areas/:id', (req, res) => {
+  const index = assessmentAreas.findIndex(a => a.assessment_id === parseInt(req.params.id));
+  if (index === -1) return res.status(404).send('Assessment area not found');
+  const removed = assessmentAreas.splice(index, 1);
+  res.json(removed[0]);
+});
+
+app.get('/assessment_areas/:areaId/prompt', (req, res) => {
+  const areaId = parseInt(req.params.areaId);
+  const promptIds = assessmentAreaPrompt
+    .filter(rel => rel.assessment_id === areaId)
+    .map(rel => rel.prompt_id);
+  const relatedPrompts = prompts.filter(p => promptIds.includes(p.prompt_id));
+  res.json(relatedPrompts);
 });
 
 app.listen(PORT, () => {

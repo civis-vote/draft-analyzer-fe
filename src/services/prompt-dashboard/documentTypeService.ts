@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { DocumentType } from '@/model/DocumentModels';
 
-const BASE_URL = 'http://127.0.0.1:8000/api'; 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const getDocumentTypes = async (): Promise<DocumentType[]> => {
   const response = await axios.get(`${BASE_URL}/document_types`);
