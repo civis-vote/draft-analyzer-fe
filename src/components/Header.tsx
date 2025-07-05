@@ -68,8 +68,8 @@ const menuItems = [
 
 const Header = () => {
   return (
-    <AntHeader className="!bg-white !px-0 shadow-md sticky top-0 z-10">
-      <div className="max-w-screen-xl mx-auto flex justify-between items-center px-4">
+    <AntHeader className="!bg-white px-2 sm:px-4 shadow-md sticky top-0 z-10">
+      <div className="mx-auto flex justify-between items-center px-4">
         {/* Logo Section */}
         <div className="flex items-center gap-2">
           <img

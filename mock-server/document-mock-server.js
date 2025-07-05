@@ -35,9 +35,9 @@ app.post('/upload_policy', upload.single('file'), (req, res) => {
   // Optional delay
   setTimeout(() => {
     res.json({
-      "doc_id": "feee3807cadc5677d4fd630076e876a369253b1b39140f8caf6c256f370214bf",
-      "file_name": "DRAFTDISCLOSURECLIMATERELATEDFINANCIALRISKS20249FBE3A566E7F487EBF9974642E6CCDB1 (1).pdf",
-      "file_type": "application/pdf",
+      "doc_id": "feee3807cadc5677d4fd630076e876a369253b1b",
+      "file_name": "DRAFTDISCLOSURECLIMATERELATEDFINANCIALRIS.pdf",
+      "file_type": "pdf",
       "number_of_pages": 12,
       "doc_size_kb": 568,
       warning,
@@ -154,6 +154,7 @@ app.post('/score', (req, res) => {
         { name: "Implementation", value: 20 },
         { name: "Clarity", value: 20 },
         { name: "Equity", value: 15 },
+        { name: "Equity 2", value: 25 },
         { name: "Funding", value: 20 },
       ],
       performanceByCategory: [

@@ -16,6 +16,9 @@ import {
 import { useDocumentStore } from "@/store/documentStore";
 import { fetchScoreAnalysis } from "@/services/documentService";
 import { ScoreAnalysisResponse } from "@/model/ScoreAnalysisModels";
+import { useProgressTrackerStore } from "@/store/progressTrackerStore";
+import { ProgressStepStatus } from "./constants/ProgressStatus";
+import { ProgressStepKey } from "./constants/ProgressStepKey";
 
 const { Paragraph, Text } = Typography;
 
@@ -32,11 +35,14 @@ const ScoreAnalysis: React.FC = () => {
 
     const loadData = async () => {
       setLoading(true);
+      useProgressTrackerStore.getState().updateStepStatus(ProgressStepKey.Score, ProgressStepStatus.Pending);
       try {
         const response = await fetchScoreAnalysis({ docId });
         setData(response);
+        useProgressTrackerStore.getState().updateStepStatus(ProgressStepKey.Score, ProgressStepStatus.Completed);
       } catch (err) {
         message.error("Failed to fetch score analysis.");
+        useProgressTrackerStore.getState().updateStepStatus(ProgressStepKey.Score, ProgressStepStatus.Error);
       } finally {
         setLoading(false);
       }

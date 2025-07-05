@@ -92,22 +92,6 @@ const AssessmentAreaForm: React.FC<Props> = ({
         </div>
 
         <div>
-          <label className="block font-medium">Created By</label>
-          <Input
-            value={formData.created_by}
-            onChange={(e) => handleChange('created_by', e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label className="block font-medium">Updated By</label>
-          <Input
-            value={formData.updated_by}
-            onChange={(e) => handleChange('updated_by', e.target.value)}
-          />
-        </div>
-
-        <div>
           <label className="block font-medium mb-2">Link Prompts</label>
           <Card className="border rounded-lg p-4 max-h-48 overflow-y-auto">
             <Checkbox.Group

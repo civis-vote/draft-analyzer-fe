@@ -3,24 +3,36 @@ import InsightSection from "@/components/InsightSection";
 import PromptEvaluation from "@/components/PromptEvaluation";
 import { useDocumentStore } from "@/store/documentStore";
 import ScoreAnalysis from "@/components/ScoreAnalysis";
+import RightSidebar from "@/components/sidebar/RightSidebar";
 
 export default function Home() {
   const { summaryRequested } = useDocumentStore();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto space-y-10">
-        <UploadSection />
+    <div className="min-h-screen bg-gray-50 py-8 px-2 sm:px-4 lg:px-4">
+      <div className="max-w-8xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
 
-        {summaryRequested && (
-          <>
-            <InsightSection />
-            <PromptEvaluation />
-            <ScoreAnalysis />
-          </>
-        )}
+        {/* Main Content */}
+        <div className="md:col-span-3 space-y-10">
+          <UploadSection />
+
+          {summaryRequested && (
+            <>
+              <InsightSection />
+              <PromptEvaluation />
+              <ScoreAnalysis />
+            </>
+          )}
+        </div>
+        {/* Sidebar */}
+        <div className="md:col-span-1">
+          <div className="sticky top-20">
+            <RightSidebar />
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
 

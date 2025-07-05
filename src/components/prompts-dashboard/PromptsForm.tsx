@@ -56,10 +56,6 @@ const PromptsForm: React.FC<Props> = ({ visible, onClose, onSubmit, mode, initia
             onChange={(e) => handleChange('question', e.target.value)}
           />
         </div>
-        <div>
-          <label className="block font-medium">Created By</label>
-          <Input value={formData.created_by} onChange={(e) => handleChange('created_by', e.target.value)} />
-        </div>
         <div className="flex justify-end gap-2 mt-4">
           <Button onClick={onClose}>Cancel</Button>
           <Button type="primary" onClick={handleSubmit}>
