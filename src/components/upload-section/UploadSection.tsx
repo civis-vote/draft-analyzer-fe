@@ -11,13 +11,14 @@ import {
 import type { UploadProps } from "antd";
 import { CloudUploadOutlined } from "@ant-design/icons";
 import { useDocumentStore } from "@/store/documentStore";
-import AssessmentsSection from "@/components/AssessmentsSection";
-import { DocumentType, DocumentValidationResponse, UploadResponse } from "@/model/DocumentModels";
+import AssessmentsSection from "@/components/upload-section/assessment-framework/AssessmentsSection";
+import { DocumentSummary, DocumentType, UploadResponse } from "@/model/DocumentModels";
 import DocumentTypeSelector from "./DocumentTypeSelector";
-import { getDocumentValidationStatus, uploadDocument } from "@/services/documentService";
+import { uploadDocument } from "@/services/documentService";
 import { ProgressStepKey } from "@/constants/ProgressStepKey";
 import { useProgressTrackerStore } from "@/store/progressTrackerStore";
 import { ProgressStepStatus } from "../../constants/ProgressStatus";
+import { useDocumentSummaryStore } from "@/store/documentSummaryStore";
 
 const { Dragger } = Upload;
 const { Title, Paragraph, Text } = Typography;
@@ -30,7 +31,7 @@ export default function UploadSection() {
   const [isDocTypeDisabled, setIsDocTypeDisabled] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showValidationWarning, setShowValidationWarning] = useState(false);
-  const [validationResponse, setValidationResponse] = useState<DocumentValidationResponse | null>(null);
+  const [validationResponse, setValidationResponse] = useState<DocumentSummary | null>(null);
   const [proceedClicked, setProceedClicked] = useState(false);
 
   const setSummaryRequested = useDocumentStore(state => state.setSummaryRequested);
@@ -82,11 +83,11 @@ export default function UploadSection() {
     try {
       setIsDocTypeDisabled(true);
       useProgressTrackerStore.getState().updateStepStatus(ProgressStepKey.DocumentValidation, ProgressStepStatus.InProgress);
-      const res: DocumentValidationResponse = await getDocumentValidationStatus(docTypeId);
+      const summary: DocumentSummary | null = await useDocumentSummaryStore.getState().getSummary(docTypeId);
 
-      setValidationResponse(res);
+      setValidationResponse(summary);
       useProgressTrackerStore.getState().updateStepStatus(ProgressStepKey.DocumentValidation, ProgressStepStatus.Completed);
-      if (res.doc_status !== "valid") {
+      if (!summary?.is_valid_document) {
         setShowValidationWarning(true);
       } else {
         finalizeSummarization();
@@ -196,7 +197,7 @@ export default function UploadSection() {
         cancelText="Cancel"
         centered
       >
-        <p>{validationResponse?.doc_status_message || "This document has issues. Do you want to proceed?"}</p>
+        <p>{validationResponse?.doc_valid_status_msg || "This document has issues. Do you want to proceed?"}</p>
       </Modal>
     </Card>
   );

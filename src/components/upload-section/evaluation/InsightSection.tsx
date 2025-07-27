@@ -12,37 +12,39 @@ import {
 } from "@ant-design/icons";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { summarizeDocument } from "@/services/documentService";
 import { useDocumentStore } from "@/store/documentStore";
 import { SummaryResponse } from "@/model/DocumentModels";
 import { useProgressTrackerStore } from "@/store/progressTrackerStore";
-import { ProgressStepStatus } from "../constants/ProgressStatus";
-import { ProgressStepKey } from "../constants/ProgressStepKey";
+import { ProgressStepStatus } from "../../../constants/ProgressStatus";
+import { ProgressStepKey } from "../../../constants/ProgressStepKey";
+import { useDocumentSummaryStore } from "@/store/documentSummaryStore";
 
 const { Title, Paragraph } = Typography;
 
 const InsightSection: React.FC = () => {
-  const fileName = useDocumentStore((state) => state.uploadResponse?.file_name);
-  const docId = useDocumentStore((state) => state.uploadResponse?.doc_id);
   const summaryRequested = useDocumentStore((state) => state.summaryRequested);
 
   const [loading, setLoading] = useState(false);
   const [summaryData, setSummaryData] = useState<SummaryResponse | null>(null);
   const summaryRef = useRef<HTMLDivElement>(null);
   const updateStepStatus = useProgressTrackerStore((state) => state.updateStepStatus);
+  const fetchAndSetSummaryText = useDocumentSummaryStore((state) => state.fetchAndSetSummaryText);
 
   useEffect(() => {
     const getSummary = async () => {
-      if (!summaryRequested || !fileName) return;
+      if (!summaryRequested) return;
       updateStepStatus(ProgressStepKey.Summarize, ProgressStepStatus.InProgress);
       setLoading(true);
+      const summary = useDocumentSummaryStore.getState().summary;
       try {
-        if (!docId) {
-          message.error("Document upload ID is missing.");
+       
+        if (!summary) {
+          message.error("Document summary is missing.");
           setLoading(false);
           return;
         }
-        const response = await summarizeDocument({ doc_id: docId });
+        console.log("Fetching summary for doc_summary_id:", summary.doc_summary_id);
+        const response = await fetchAndSetSummaryText(summary.doc_summary_id || 0);
         setSummaryData(response);
         updateStepStatus(ProgressStepKey.Summarize, ProgressStepStatus.Completed);
       } catch (err) {
@@ -54,7 +56,7 @@ const InsightSection: React.FC = () => {
     };
 
     getSummary();
-  }, [summaryRequested, fileName, updateStepStatus]);
+  }, [summaryRequested, updateStepStatus]);
 
   const handleDownloadPDF = async () => {
     if (!summaryRef.current) return;

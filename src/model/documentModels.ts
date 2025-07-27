@@ -24,7 +24,7 @@ export interface SummaryRequest {
 // Summarize response (used in InsightSection)
 export interface SummaryResponse {
   doc_summary_id: number;
-  document_id: string;
+  doc_id: string;
   summary_text: string;
 }
 
@@ -61,7 +61,18 @@ export interface DocumentTypeAssessment {
 
 // Document validation response
 export interface DocumentValidationResponse {
+  doc_summary_id: number;
   doc_id: string;
-  doc_status: string;
-  doc_status_message: string;
+  doc_type_id: number;
+  is_valid_document: boolean;
+  doc_valid_status_msg: string;
+}
+
+export interface DocumentSummary {
+  doc_summary_id: number;
+  doc_id: string;
+  doc_type_id: number;
+  is_valid_document: boolean;
+  doc_valid_status_msg: string;
+  summary_text: string | null;
 }

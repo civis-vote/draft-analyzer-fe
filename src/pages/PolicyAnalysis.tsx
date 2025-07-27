@@ -1,8 +1,8 @@
 import UploadSection from "@/components/upload-section/UploadSection";
-import InsightSection from "@/components/InsightSection";
-import PromptEvaluation from "@/components/PromptEvaluation";
+import InsightSection from "@/components/upload-section/evaluation/InsightSection";
+import PromptEvaluation from "@/components/upload-section/evaluation/PromptEvaluation";
 import { useDocumentStore } from "@/store/documentStore";
-import ScoreAnalysis from "@/components/ScoreAnalysis";
+import ScoreAnalysis from "@/components/upload-section/evaluation/ScoreAnalysis";
 import RightSidebar from "@/components/sidebar/RightSidebar";
 
 export default function Home() {

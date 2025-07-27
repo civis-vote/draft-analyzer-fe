@@ -17,8 +17,8 @@ import { useDocumentStore } from "@/store/documentStore";
 import { fetchScoreAnalysis } from "@/services/documentService";
 import { ScoreAnalysisResponse } from "@/model/ScoreAnalysisModels";
 import { useProgressTrackerStore } from "@/store/progressTrackerStore";
-import { ProgressStepStatus } from "../constants/ProgressStatus";
-import { ProgressStepKey } from "../constants/ProgressStepKey";
+import { ProgressStepStatus } from "../../../constants/ProgressStatus";
+import { ProgressStepKey } from "../../../constants/ProgressStepKey";
 
 const { Paragraph, Text } = Typography;
 

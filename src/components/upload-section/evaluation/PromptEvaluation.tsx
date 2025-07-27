@@ -4,8 +4,8 @@ import { EvaluationItem } from "@/model/EvaluationModels";
 import { fetchPromptEvaluations } from "@/services/documentService";
 import { useDocumentStore } from "@/store/documentStore";
 import { useProgressTrackerStore } from "@/store/progressTrackerStore";
-import { ProgressStepStatus } from "../constants/ProgressStatus";
-import { ProgressStepKey } from "../constants/ProgressStepKey";
+import { ProgressStepStatus } from "../../../constants/ProgressStatus";
+import { ProgressStepKey } from "../../../constants/ProgressStepKey";
 
 const { Title, Paragraph } = Typography;
 

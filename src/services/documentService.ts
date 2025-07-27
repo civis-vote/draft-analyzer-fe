@@ -1,7 +1,8 @@
 import axios from "axios";
-import { UploadResponse, SummaryRequest, SummaryResponse, DocumentType, Assessment, AssessmentPrompt, UploadRequest, DocumentValidationResponse } from "@/model/DocumentModels";
+import { UploadResponse, SummaryResponse, DocumentType, Assessment, AssessmentPrompt, UploadRequest, DocumentSummary } from "@/model/DocumentModels";
 import { EvaluationResponse, EvaluationRequest } from "@/model/EvaluationModels";
 import { ScoreAnalysisRequest, ScoreAnalysisResponse } from "@/model/ScoreAnalysisModels";
+import { useDocumentStore } from "@/store/documentStore";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -27,8 +28,8 @@ export const createDocument = async (newDocument: UploadResponse): Promise<Uploa
   return response.data;
 };
 
-export const summarizeDocument = async (request: SummaryRequest): Promise<SummaryResponse> => {
-  const response = await axios.get<SummaryResponse>(`${BASE_URL}/summarize/${request.doc_id}`);
+export const summarizeDocument = async (doc_summary_id: number): Promise<SummaryResponse> => {
+  const response = await axios.get<SummaryResponse>(`${BASE_URL}/summarize/${doc_summary_id}`);
   return response.data;
 };
 
@@ -48,8 +49,13 @@ export const getAssessmentPrompts = async (assessmentId: number): Promise<Assess
   return response.data;
 };
 
-export const getDocumentValidationStatus = async (doc_type_id: number): Promise<DocumentValidationResponse> => {
-  const response = await axios.get<DocumentValidationResponse>(`${BASE_URL}/document_types/${doc_type_id}/validation_status`);
+export const getDocumentValidationStatus = async (doc_type_id: number): Promise<DocumentSummary> => {
+
+  const doc_id = useDocumentStore.getState().uploadResponse?.doc_id;
+  if (!doc_id || !doc_type_id) {
+    throw new Error("Document ID and Document Type ID are required for validation.");
+  }
+  const response = await axios.get<DocumentSummary>(`${BASE_URL}/document/${doc_id}/document-type/${doc_type_id}/validate`);
   return response.data;
 };
 
