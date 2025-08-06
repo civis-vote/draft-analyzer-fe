@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Card, Typography, Tag, Space, Spin, message } from "antd";
 import { EvaluationItem } from "@/model/EvaluationModels";
-import { fetchPromptEvaluations } from "@/services/documentService";
-import { useDocumentStore } from "@/store/documentStore";
+import { useDocumentStore, useDocumentTypeStore } from "@/store/documentStore";
 import { useProgressTrackerStore } from "@/store/progressTrackerStore";
+import { useDocumentSummaryStore } from "@/store/documentSummaryStore";
+import { usePromptEvaluationStore } from "@/store/promptEvaluationStore";
 import { ProgressStepStatus } from "../../../constants/ProgressStatus";
 import { ProgressStepKey } from "../../../constants/ProgressStepKey";
 
@@ -16,20 +17,24 @@ const getScoreTagColor = (score: number) => {
 };
 
 const PromptEvaluation: React.FC = () => {
-  const fileName = useDocumentStore((state) => state.uploadResponse?.file_name);
-  const docId = useDocumentStore((state) => state.uploadResponse?.doc_id);
+  const summaryRequested = useDocumentStore((state) => state.summaryRequested);
   const [evaluations, setEvaluations] = useState<EvaluationItem[]>([]);
   const [loading, setLoading] = useState(false);
   const updateStepStatus = useProgressTrackerStore((state) => state.updateStepStatus);
+  const fetchAndSetAssessmentEvaluations = usePromptEvaluationStore((state) => state.fetchAndSetAssessmentEvaluations);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!fileName || !docId) return;
+    const fetchData = () => {
+      if (!summaryRequested) return;
       setLoading(true);
       updateStepStatus(ProgressStepKey.Evaluate, ProgressStepStatus.InProgress);
+      const summary = useDocumentSummaryStore.getState().summary;
+      const document_type = useDocumentTypeStore.getState().documentTypes.filter(
+        (type) => type.doc_type_id == summary.doc_type_id
+      );
       try {
-        const data = await fetchPromptEvaluations({ docId });
-        setEvaluations(data.evaluations);
+        const evaluations = fetchAndSetAssessmentEvaluations(summary.doc_summary_id, document_type.assessment_ids);
+        setEvaluations(evaluations);
         updateStepStatus(ProgressStepKey.Evaluate, ProgressStepStatus.Completed);
       } catch (err) {
         message.error("Failed to fetch evaluations.");
@@ -40,7 +45,7 @@ const PromptEvaluation: React.FC = () => {
     };
 
     fetchData();
-  }, [docId]);
+  }, [summaryRequested, updateStepStatus]);
 
   return (
     <Card className="shadow-lg rounded-2xl p-6 mx-auto mt-8 mb-16">
