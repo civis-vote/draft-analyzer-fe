@@ -31,7 +31,7 @@ const PromptEvaluation: React.FC = () => {
       const summary = useDocumentSummaryStore.getState().summary;
       const document_type = useDocumentTypeStore.getState().documentTypes.filter(
         (type) => type.doc_type_id == summary.doc_type_id
-      );
+      )[0];
       try {
         const evaluations = fetchAndSetAssessmentEvaluations(summary.doc_summary_id, document_type.assessment_ids);
         setEvaluations(evaluations);
