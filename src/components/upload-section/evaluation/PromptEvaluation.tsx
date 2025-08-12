@@ -4,9 +4,10 @@ import { Card, Typography } from "antd";
 import { useDocumentStore, useDocumentTypeStore } from "@/store/documentStore";
 import { useProgressTrackerStore } from "@/store/progressTrackerStore";
 import { useDocumentSummaryStore } from "@/store/documentSummaryStore";
-// import { usePromptEvaluationStore } from "@/store/promptEvaluationStore";
+import { useAssessmentEvaluationStore } from "@/store/assessmentEvaluationStore";
 import { ProgressStepStatus } from "../../../constants/ProgressStatus";
 import { ProgressStepKey } from "../../../constants/ProgressStepKey";
+import { AssessmentAreaEvaluation } from "@/model/documentModels";
 import AssessmentAreaCard from "../assessment-evaluation/AssessmentAreaCard";
 
 const { Title, Paragraph } = Typography;
@@ -17,6 +18,14 @@ const { Title, Paragraph } = Typography;
 //   return "red";
 // };
 
+const getSize = (obj: Map<number, AssessmentAreaEvaluation> | object) => {
+  if (obj instanceof Map) {
+    return obj.size;
+  } else {
+    return Object.keys(obj).length;
+  }
+};
+
 const PromptEvaluation: React.FC = () => {
   const summaryRequested = useDocumentStore((state) => state.summaryRequested);
   // const [evaluations, setEvaluations] = useState<EvaluationItem[]>([]);
@@ -24,7 +33,9 @@ const PromptEvaluation: React.FC = () => {
   const [docSummaryId, setDocSummaryId] = useState(0);
   const [assessmentIds, setAssessmentIds] = useState([]);
   const updateStepStatus = useProgressTrackerStore((state) => state.updateStepStatus);
-  // const fetchAndSetAssessmentEvaluations = usePromptEvaluationStore((state) => state.fetchAndSetAssessmentEvaluations);
+  // const fetchAndSetAssessmentEvaluations = useAssessmentEvaluationStore((state) => state.fetchAndSetAssessmentEvaluations);
+  const evaluations = useAssessmentEvaluationStore.getState().evaluations;
+  const evaluationsError = useAssessmentEvaluationStore.getState().evluationsError;
 
   useEffect(() => {
     const setStates = () => {
@@ -47,11 +58,18 @@ const PromptEvaluation: React.FC = () => {
       // } finally {
       //   setLoading(false);
       // }
-      updateStepStatus(ProgressStepKey.Evaluate, ProgressStepStatus.Completed);
     };
 
     setStates();
   }, [summaryRequested, updateStepStatus]);
+
+  useEffect(() => {
+    if (getSize(evaluationsError) > 0) {
+      updateStepStatus(ProgressStepKey.Evaluate, ProgressStepStatus.Error);
+    } else if (getSize(evaluations) + getSize(evaluationsError) === assessmentIds.length) {
+      updateStepStatus(ProgressStepKey.Evaluate, ProgressStepStatus.Completed);
+    }
+  }, [evaluations, evaluationsError]);
 
   return (
     <Card className="shadow-lg rounded-2xl p-6 mx-auto mt-8 mb-16">
