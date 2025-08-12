@@ -1,20 +1,20 @@
 import { create } from "zustand";
-import { AssessmentAreaEvaluation } from "@/model/DocumentModels";
-import { fetchPromptEvaluations } from "@/services/documentService";
+import { AssessmentAreaEvaluation } from "@/model/documentModels";
+import { fetchAssessmentEvaluation } from "@/services/documentService";
 
 interface PromptEvaluationStore {
-  evaluations: AssessmentAreaEvaluation[] | null;
-  fetchAndSetAssessmentEvaluations: (doc_summary_id: number, assessment_ids: number[]) => AssessmentAreaEvaluation[];
-}
+  evaluations: Map<number, AssessmentAreaEvaluation> | object;
+  fetchAndSetAssessmentEvaluation: (doc_summary_id: number, assessment_ids: number) => Promise<AssessmentAreaEvaluation>;
+};
 
 export const usePromptEvaluationStore = create<PromptEvaluationStore>((set) => ({
-  evaluations: null,
+  evaluations: {},
 
-  fetchAndSetAssessmentEvaluations: (doc_summary_id: number, assessment_ids: number[]) => {
-    // iterate through all assessment_id in assessment_ids 
-    // call fetchPromptEvaluation service with doc_summary_id and assessment_id
-    // wait for all the promises to resolve and set the evaluations state
-    // return evaluations
-    return;
+  fetchAndSetAssessmentEvaluation: async (doc_summary_id: number, assessment_id: number) => {
+    const evaluation: AssessmentAreaEvaluation = await fetchAssessmentEvaluation(doc_summary_id, assessment_id);
+    set((state) => ({
+      evaluations: {...state.evaluations, evaluation}
+    }));
+    return evaluation;
   }
 }));

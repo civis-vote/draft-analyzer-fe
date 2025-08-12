@@ -1,6 +1,6 @@
 import axios from "axios";
-import { UploadResponse, SummaryResponse, DocumentType, Assessment, AssessmentPrompt, UploadRequest, DocumentSummary } from "@/model/DocumentModels";
-import { EvaluationResponse, EvaluationRequest } from "@/model/EvaluationModels";
+import { UploadResponse, SummaryResponse, DocumentType, Assessment, AssessmentPrompt, UploadRequest, DocumentSummary, AssessmentAreaEvaluation } from "@/model/DocumentModels";
+// import { EvaluationResponse, EvaluationRequest } from "@/model/EvaluationModels";
 import { ScoreAnalysisRequest, ScoreAnalysisResponse } from "@/model/ScoreAnalysisModels";
 import { useDocumentStore } from "@/store/documentStore";
 
@@ -72,12 +72,11 @@ export const downloadSummaryReport = async (doc_summary_id: number) => {
   window.URL.revokeObjectURL(url);
 };
 
-export const fetchPromptEvaluations = async (
-  req: EvaluationRequest
-): Promise<EvaluationResponse> => {
-  const response = await axios.post<EvaluationResponse>(
-    `${BASE_URL}/evaluations`,
-    req
+export const fetchAssessmentEvaluation = async (
+  doc_summary_id: number, assessment_id: number
+): Promise<AssessmentAreaEvaluation> => {
+  const response = await axios.get<AssessmentAreaEvaluation>(
+    `${BASE_URL}/summary/${doc_summary_id}/assessment/${assessment_id}`,
   );
   return response.data;
 };

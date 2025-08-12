@@ -1,50 +1,56 @@
 import React, { useEffect, useState } from "react";
-import { Card, Typography, Tag, Space, Spin, message } from "antd";
-import { EvaluationItem } from "@/model/EvaluationModels";
+import { Card, Typography } from "antd";
+// import { EvaluationItem } from "@/model/EvaluationModels";
 import { useDocumentStore, useDocumentTypeStore } from "@/store/documentStore";
 import { useProgressTrackerStore } from "@/store/progressTrackerStore";
 import { useDocumentSummaryStore } from "@/store/documentSummaryStore";
-import { usePromptEvaluationStore } from "@/store/promptEvaluationStore";
+// import { usePromptEvaluationStore } from "@/store/promptEvaluationStore";
 import { ProgressStepStatus } from "../../../constants/ProgressStatus";
 import { ProgressStepKey } from "../../../constants/ProgressStepKey";
+import AssessmentAreaCard from "../assessment-evaluation/AssessmentAreaCard";
 
 const { Title, Paragraph } = Typography;
 
-const getScoreTagColor = (score: number) => {
-  if (score >= 8) return "green";
-  if (score >= 6) return "orange";
-  return "red";
-};
+// const getScoreTagColor = (score: number) => {
+//   if (score >= 8) return "green";
+//   if (score >= 6) return "orange";
+//   return "red";
+// };
 
 const PromptEvaluation: React.FC = () => {
   const summaryRequested = useDocumentStore((state) => state.summaryRequested);
-  const [evaluations, setEvaluations] = useState<EvaluationItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  // const [evaluations, setEvaluations] = useState<EvaluationItem[]>([]);
+  // const [loading, setLoading] = useState(false);
+  const [docSummaryId, setDocSummaryId] = useState(0);
+  const [assessmentIds, setAssessmentIds] = useState([]);
   const updateStepStatus = useProgressTrackerStore((state) => state.updateStepStatus);
-  const fetchAndSetAssessmentEvaluations = usePromptEvaluationStore((state) => state.fetchAndSetAssessmentEvaluations);
+  // const fetchAndSetAssessmentEvaluations = usePromptEvaluationStore((state) => state.fetchAndSetAssessmentEvaluations);
 
   useEffect(() => {
-    const fetchData = () => {
+    const setStates = () => {
       if (!summaryRequested) return;
-      setLoading(true);
+      // setLoading(true);
       updateStepStatus(ProgressStepKey.Evaluate, ProgressStepStatus.InProgress);
       const summary = useDocumentSummaryStore.getState().summary;
+      setDocSummaryId(summary.doc_summary_id);
       const document_type = useDocumentTypeStore.getState().documentTypes.filter(
         (type) => type.doc_type_id == summary.doc_type_id
       )[0];
-      try {
-        const evaluations = fetchAndSetAssessmentEvaluations(summary.doc_summary_id, document_type.assessment_ids);
-        setEvaluations(evaluations);
-        updateStepStatus(ProgressStepKey.Evaluate, ProgressStepStatus.Completed);
-      } catch (err) {
-        message.error("Failed to fetch evaluations.");
-        updateStepStatus(ProgressStepKey.Evaluate, ProgressStepStatus.Error);
-      } finally {
-        setLoading(false);
-      }
+      setAssessmentIds(document_type.assessment_ids);
+      // try {
+      //   const evaluations = fetchAndSetAssessmentEvaluations(summary.doc_summary_id, document_type.assessment_ids);
+      //   setEvaluations(evaluations);
+      //   updateStepStatus(ProgressStepKey.Evaluate, ProgressStepStatus.Completed);
+      // } catch (err) {
+      //   message.error("Failed to fetch evaluations.");
+      //   updateStepStatus(ProgressStepKey.Evaluate, ProgressStepStatus.Error);
+      // } finally {
+      //   setLoading(false);
+      // }
+      updateStepStatus(ProgressStepKey.Evaluate, ProgressStepStatus.Completed);
     };
 
-    fetchData();
+    setStates();
   }, [summaryRequested, updateStepStatus]);
 
   return (
@@ -60,7 +66,7 @@ const PromptEvaluation: React.FC = () => {
         predefined description.
       </Paragraph>
 
-      {loading ? (
+      {/* {loading ? (
         <div className="flex justify-center py-8">
           <Spin tip="Loading evaluations..." size="large" />
         </div>
@@ -88,7 +94,10 @@ const PromptEvaluation: React.FC = () => {
             </Card>
           ))}
         </Space>
-      )}
+      )} */}
+      {assessmentIds.map((assessment_id) => (
+        <AssessmentAreaCard doc_summary_id={docSummaryId} assessment_id={assessment_id}/>
+      ))}
     </Card>
   );
 };
