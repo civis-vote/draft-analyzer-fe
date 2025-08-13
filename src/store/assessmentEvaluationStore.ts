@@ -4,14 +4,14 @@ import { fetchAssessmentEvaluation } from "@/services/documentService";
 
 interface AssessmentEvaluationStore {
   evaluations: Map<number, AssessmentAreaEvaluation> | object;
-  evluationsError: Map<number, any> | object;
+  evaluationsError: Map<number, any> | object;
   fetchAndSetAssessmentEvaluation: (doc_summary_id: number, assessment_ids: number) => Promise<AssessmentAreaEvaluation>;
   setEvaluationError: (assessment_id: number, evaluationError: any) => void;
 };
 
 export const useAssessmentEvaluationStore = create<AssessmentEvaluationStore>((set) => ({
   evaluations: {},
-  evluationsError: {},
+  evaluationsError: {},
 
   fetchAndSetAssessmentEvaluation: async (doc_summary_id: number, assessment_id: number) => {
     const evaluation: AssessmentAreaEvaluation = await fetchAssessmentEvaluation(doc_summary_id, assessment_id);
@@ -23,7 +23,7 @@ export const useAssessmentEvaluationStore = create<AssessmentEvaluationStore>((s
 
   setEvaluationError: (assessment_id:number, evaluationError: any) => {
     set((state) => ({
-      evluationsError: {...state.evluationsError, [assessment_id]: evaluationError}
+      evaluationsError: {...state.evaluationsError, [assessment_id]: evaluationError}
     }))
   }
   

@@ -34,8 +34,8 @@ const PromptEvaluation: React.FC = () => {
   const [assessmentIds, setAssessmentIds] = useState([]);
   const updateStepStatus = useProgressTrackerStore((state) => state.updateStepStatus);
   // const fetchAndSetAssessmentEvaluations = useAssessmentEvaluationStore((state) => state.fetchAndSetAssessmentEvaluations);
-  const evaluations = useAssessmentEvaluationStore.getState().evaluations;
-  const evaluationsError = useAssessmentEvaluationStore.getState().evluationsError;
+  const evaluations = useAssessmentEvaluationStore((state) => state.evaluations);
+  const evaluationsError = useAssessmentEvaluationStore((state) => state.evaluationsError);
 
   useEffect(() => {
     const setStates = () => {
