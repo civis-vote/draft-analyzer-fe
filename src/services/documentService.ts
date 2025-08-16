@@ -1,7 +1,6 @@
 import axios from "axios";
 import { UploadResponse, SummaryResponse, DocumentType, Assessment, AssessmentPrompt, UploadRequest, DocumentSummary, AssessmentAreaEvaluation } from "@/model/DocumentModels";
-// import { EvaluationResponse, EvaluationRequest } from "@/model/EvaluationModels";
-import { ScoreAnalysisRequest, ScoreAnalysisResponse } from "@/model/ScoreAnalysisModels";
+import { ScoreAnalysisResponse } from "@/model/ScoreAnalysisModels";
 import { useDocumentStore } from "@/store/documentStore";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -82,19 +81,14 @@ export const fetchAssessmentEvaluation = async (
 };
 
 export const fetchScoreAnalysis = async (
-  req: ScoreAnalysisRequest
-): Promise<ScoreAnalysisResponse> => {
-  const res = await fetch(`${BASE_URL}/score`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(req),
-  });
+  doc_summary_id: number
+): Promise<ScoreAnalysisResponse[]> => {
+  const res = await axios.get<ScoreAnalysisResponse[]>(`${BASE_URL}/prompt_score/${doc_summary_id}`,
+   );
 
-  if (!res.ok) {
+  if (res.status < 200 || res.status >= 300) {
     throw new Error("Failed to fetch score analysis");
   }
 
-  return res.json();
+  return res.data;
 };

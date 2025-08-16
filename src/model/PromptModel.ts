@@ -14,6 +14,7 @@ export interface Prompt {
 export enum PromptType {
   ASSESSMENT = "ASSESSMENT",
   VALIDATION = "VALIDATION",
-  SUMMARY = "SUMMARY"
+  SUMMARY = "SUMMARY",
+  EXECUTIVE_SUMMARY = "EXECUTIVE_SUMMARY"
 }
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal } from 'antd';
 import InsightSection from '../upload-section/evaluation/InsightSection';
-import PromptEvaluation from '../upload-section/evaluation/PromptEvaluation';
+import EvaluationSection from '../upload-section/assessment-evaluation/EvaluationSection';
 import ScoreAnalysis from '../upload-section/evaluation/ScoreAnalysis';
 import { type HistoryDocument } from '@/store/historyStore';
 
@@ -28,7 +28,7 @@ const AnalysisModal: React.FC<AnalysisModalProps> = ({
     >
       <div className="max-h-[80vh] overflow-y-auto">
         <InsightSection />
-        <PromptEvaluation />
+        <EvaluationSection />
         <ScoreAnalysis />
       </div>
     </Modal>

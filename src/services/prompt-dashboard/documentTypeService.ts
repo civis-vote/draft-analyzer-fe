@@ -1,5 +1,5 @@
-import axios from 'axios';
 import { DocumentType } from '@/model/DocumentModels';
+import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 

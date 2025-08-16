@@ -79,7 +79,7 @@ const InsightSection: React.FC = () => {
     <Card className="shadow-lg rounded-2xl p-6 mx-auto mt-8 mb-16">
       <div ref={summaryRef} style={{ padding: "1rem" }}>
         <Title level={3} style={{ textAlign: "center" }}>
-          Get Your Document Insights
+          Document Insights
         </Title>
         <Paragraph
           type="secondary"
@@ -89,7 +89,7 @@ const InsightSection: React.FC = () => {
             margin: "0 auto 24px",
           }}
         >
-          Easily view the summary of your uploaded policy documents.
+          Summary of your uploaded policy document
         </Paragraph>
 
         {loading ? (

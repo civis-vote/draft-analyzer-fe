@@ -77,20 +77,8 @@ export interface DocumentSummary {
   summary_text: string | null;
 }
 
-export interface PromptScore {
-  prompt_score_id: number,
-  assessment_summary_id: number,
-  prompt_id: number,
-  prompt_score: number,
-  max_score: number,
-  score_justification: string,
-  reference: string
-}
-
 export interface AssessmentAreaEvaluation {
-  assessment_area_summary: number;
   assessment_id: number;
   summary: string;
   overall_score: number;
-  prompt_scores: PromptScore[];
 }

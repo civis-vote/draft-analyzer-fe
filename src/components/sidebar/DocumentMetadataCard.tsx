@@ -3,6 +3,9 @@ import { Button, Card, Descriptions, message } from "antd";
 import { UploadResponse } from "@/model/DocumentModels";
 import { downloadSummaryReport } from "@/services/documentService";
 import { useDocumentSummaryStore } from "@/store/documentSummaryStore";
+import { useProgressTrackerStore } from "@/store/progressTrackerStore";
+import { ProgressStepKey } from "@/constants/ProgressStepKey";
+import { ProgressStepStatus } from "@/constants/ProgressStatus";
 
 const formatFileSize = (sizeKb: number) => {
   return sizeKb >= 1024 ? `${(sizeKb / 1024).toFixed(2)} MB` : `${sizeKb} KB`;
@@ -12,6 +15,7 @@ const DocumentMetadataCard: React.FC<{ document: UploadResponse }> = ({
   document,
 }) => {
 
+  const updateStepStatus = useProgressTrackerStore((state) => state.updateStepStatus);
   const handleSummaryDownload = async () => {
     const doc_summary_id = useDocumentSummaryStore.getState().summary?.doc_summary_id;
     if (!doc_summary_id) {
@@ -20,10 +24,13 @@ const DocumentMetadataCard: React.FC<{ document: UploadResponse }> = ({
     }
     
     try {
+      updateStepStatus(ProgressStepKey.Download, ProgressStepStatus.InProgress);
       await downloadSummaryReport(doc_summary_id);
       message.success('Summary report downloaded successfully');
+      updateStepStatus(ProgressStepKey.Download, ProgressStepStatus.Completed);
     } catch (error) {
       message.error('Download failed');
+      updateStepStatus(ProgressStepKey.Download, ProgressStepStatus.Error);
     }
   };
 

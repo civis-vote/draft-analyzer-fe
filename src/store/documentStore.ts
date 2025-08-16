@@ -1,4 +1,3 @@
-import { DocumentType, UploadResponse } from '@/model/DocumentModels';
 import { create } from 'zustand';
 import {
   getDocumentTypes,
@@ -6,6 +5,7 @@ import {
   updateDocumentType,
   deleteDocumentType,
 } from '@/services/prompt-dashboard/documentTypeService';
+import { DocumentType, UploadResponse } from '@/model/DocumentModels';
 
 interface DocumentState {
   fileUploaded: boolean;

@@ -19,6 +19,7 @@ import { ProgressStepKey } from "@/constants/ProgressStepKey";
 import { useProgressTrackerStore } from "@/store/progressTrackerStore";
 import { ProgressStepStatus } from "../../constants/ProgressStatus";
 import { useDocumentSummaryStore } from "@/store/documentSummaryStore";
+import { useAssessmentEvaluationStore } from "@/store/assessmentEvaluationStore";
 
 const { Dragger } = Upload;
 const { Title, Paragraph, Text } = Typography;
@@ -52,12 +53,15 @@ export default function UploadSection() {
 
     // Reset document store flags
     setSummaryRequested(false);
-    setUploadResponse(null);  
+    setUploadResponse(null);
+    useDocumentSummaryStore.getState().reset();
+    useAssessmentEvaluationStore.getState().reset();
   };
 
   const handleUpload = async (file: File) => {
     setIsUploading(true);
     resetUploadState();
+    useProgressTrackerStore.getState().updateStepStatus(ProgressStepKey.Upload, ProgressStepStatus.InProgress);
     try {
       const res: UploadResponse = await uploadDocument({
         file,

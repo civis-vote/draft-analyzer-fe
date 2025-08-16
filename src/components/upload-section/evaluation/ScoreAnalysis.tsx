@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Card, Typography, Row, Col, Button, Spin, message } from "antd";
+import React, { useEffect, useMemo, useState } from "react";
+import { Card, Spin, message, Progress, Row, Col } from "antd";
 import {
   PieChart,
   Pie,
@@ -10,35 +10,80 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Legend,
   ResponsiveContainer,
+  LabelList,
+  Legend,
 } from "recharts";
-import { useDocumentStore } from "@/store/documentStore";
 import { fetchScoreAnalysis } from "@/services/documentService";
 import { ScoreAnalysisResponse } from "@/model/ScoreAnalysisModels";
 import { useProgressTrackerStore } from "@/store/progressTrackerStore";
 import { ProgressStepStatus } from "../../../constants/ProgressStatus";
 import { ProgressStepKey } from "../../../constants/ProgressStepKey";
-
-const { Paragraph, Text } = Typography;
+import { useDocumentSummaryStore } from "@/store/documentSummaryStore";
+import { aggregateData } from "@/utils/helpers";
+import { useAssessmentEvaluationStore } from "@/store/assessmentEvaluationStore";
+import { useDocumentTypeStore } from "@/store/documentStore";
+import Title from "antd/es/typography/Title";
+import Paragraph from "antd/es/typography/Paragraph";
 
 const pieColors = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#A9A9F5"];
 
 const ScoreAnalysis: React.FC = () => {
-  const fileName = useDocumentStore((state) => state.uploadResponse?.file_name);
-  const docId = useDocumentStore((state) => state.uploadResponse?.doc_id);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<ScoreAnalysisResponse | null>(null);
-  const updateStepStatus = useProgressTrackerStore((state) => state.updateStepStatus);
+  const [data, setData] = useState<ScoreAnalysisResponse[] | null>(null);
 
+  const updateStepStatus = useProgressTrackerStore((state) => state.updateStepStatus);
+  const { doc_summary_id = null, doc_type_id = null } =
+    useDocumentSummaryStore((state) => state.summary ?? {
+      doc_summary_id: null,
+      doc_type_id: null,
+    });
+
+  const { evaluations, evaluationsError } = useAssessmentEvaluationStore();
+
+  const documentTypes = useDocumentTypeStore((state) => state.documentTypes);
+
+  const documentType = useMemo(
+    () =>
+      doc_type_id
+        ? documentTypes.find((type) => type.doc_type_id === doc_type_id)
+        : undefined,
+    [documentTypes, doc_type_id]
+  );
+
+  const isEvaluationComplete =
+  !!documentType?.assessment_ids?.length &&
+  documentType.assessment_ids.every(
+    (id) =>
+      evaluations &&
+      //evaluationsError &&
+      (
+        (evaluations as Record<number, any>)[id] !== undefined 
+        // || (evaluationsError as Record<number, any>)[id] !== undefined
+      )
+  );
+
+
+  // Track evaluation progress status
   useEffect(() => {
-    if (!fileName || !docId) return;
+    if (!documentType?.assessment_ids?.length) return;
+
+    if (isEvaluationComplete) {
+      updateStepStatus(ProgressStepKey.Evaluate, ProgressStepStatus.Completed);
+    } else {
+      updateStepStatus(ProgressStepKey.Evaluate, ProgressStepStatus.InProgress);
+    }
+  }, [isEvaluationComplete, documentType?.assessment_ids, updateStepStatus]);
+
+  // Don’t even try loading scores until evaluation complete
+  useEffect(() => {
+    if (!doc_summary_id || !isEvaluationComplete) return;
 
     const loadData = async () => {
       setLoading(true);
       updateStepStatus(ProgressStepKey.Score, ProgressStepStatus.InProgress);
       try {
-        const response = await fetchScoreAnalysis({ docId });
+        const response = await fetchScoreAnalysis(doc_summary_id);
         setData(response);
         updateStepStatus(ProgressStepKey.Score, ProgressStepStatus.Completed);
       } catch (err) {
@@ -50,7 +95,11 @@ const ScoreAnalysis: React.FC = () => {
     };
 
     loadData();
-  }, [fileName]);
+  }, [doc_summary_id, isEvaluationComplete, updateStepStatus]);
+
+  if (!isEvaluationComplete) {
+    return null; // wait until all evaluations done
+  }
 
   if (loading) {
     return (
@@ -64,98 +113,90 @@ const ScoreAnalysis: React.FC = () => {
     return null;
   }
 
+  const aggregatedData = aggregateData(data);
+
   return (
     <Card className="shadow-lg rounded-2xl p-6 mx-auto mt-8 mb-16">
-      <Row gutter={[16, 16]} justify="center">
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Text strong style={{ fontSize: "24px", color: "#1890ff" }}>
-              {data.overallScore}
-            </Text>
-            <Paragraph>Overall Score</Paragraph>
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Text strong style={{ fontSize: "24px", color: "#1890ff" }}>
-              {data.clarityRating}
-            </Text>
-            <Paragraph>Clarity Rating</Paragraph>
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Text strong style={{ fontSize: "24px", color: "#1890ff" }}>
-              {data.implementationDetail}
-            </Text>
-            <Paragraph>Implementation Detail</Paragraph>
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Text strong style={{ fontSize: "24px", color: "#1890ff" }}>
-              {data.stakeholderEngagement}
-            </Text>
-            <Paragraph>Stakeholder Engagement</Paragraph>
-          </Card>
-        </Col>
+          <Title level={3} className="text-center">
+            Score Analysis by Criteria
+          </Title>
+          <Paragraph type="secondary" className="text-center mb-6">
+            View the score for uploaded policy document as per criteria.
+          </Paragraph>
+    
+      {/* Score Cards */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        {aggregatedData.map((item) => (
+          <Col xs={24} sm={12} md={8} lg={6} key={item.criteria}>
+            <Card title={item.criteria} bordered bodyStyle={{ padding: "12px 16px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 14, color: "#888" }}>Score</span>
+                <span style={{ fontSize: 16, fontWeight: "bold" }}>
+                  {item.Score} / {item.Max}
+                </span>
+              </div>
+              <Progress
+                percent={(item.Score / item.Max) * 100}
+                showInfo={false}
+                strokeColor="#1677ff"
+              />
+            </Card>
+          </Col>
+        ))}
       </Row>
 
-      <Row gutter={[24, 24]} style={{ marginTop: 32 }}>
+      {/* Charts */}
+      <Row gutter={[16, 16]}>
         <Col xs={24} md={12}>
-          <Card title="Policy Element Scores">
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={data.policyElementScores}
-                  dataKey="value"
-                  nameKey="name"
-                  outerRadius={80}
-                  label
+          <Card title="Score Overview (Bar Chart)" bordered={false}>
+            <div style={{ height: 320, padding: "8px" }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={aggregatedData}
+                  margin={{ top: 30, right: 40, left: 20, bottom: 20 }}
                 >
-                  {data.policyElementScores.map((_, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={pieColors[index % pieColors.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="criteria" />
+                  <YAxis domain={[0, (dataMax: number) => Math.max(10, dataMax)]} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="Score" fill="#1677ff" radius={[4, 4, 0, 0]}>
+                    <LabelList dataKey="Score" position="top" offset={10} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </Card>
         </Col>
 
         <Col xs={24} md={12}>
-          <Card title="Performance by Category">
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={data.performanceByCategory}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="score" fill="#8884d8" />
-              </BarChart>
-            </ResponsiveContainer>
+          <Card title="Score Distribution (Pie Chart)" bordered={false}>
+            <div style={{ height: 320, padding: "8px" }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={aggregatedData}
+                    dataKey="Score"
+                    nameKey="criteria"
+                    outerRadius={100}
+                    label
+                  >
+                    {aggregatedData.map((_, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={pieColors[index % pieColors.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </Card>
         </Col>
       </Row>
-
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "1rem",
-          marginTop: "16px",
-        }}
-      >
-        <Button type="primary" ghost>
-          Download Results
-        </Button>
-      </div>
     </Card>
   );
 };
-
 export default ScoreAnalysis;

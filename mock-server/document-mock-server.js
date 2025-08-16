@@ -155,36 +155,60 @@ app.post('/evaluations', (req, res) => {
   }, 1500);
 });
 
-app.post('/score', (req, res) => {
-  const { docId } = req.body;
-
+app.get('/prompt_score/:doc_summary_id', (req, res) => {
+  const { doc_summary_id } = req.params;
   setTimeout(() => {
-    if (!docId) {
-      return res.status(400).json({ error: 'Missing docId' });
+    if (!doc_summary_id) {
+      return res.status(400).json({ error: 'Missing doc_summary_id' });
     }
 
-    res.json({
-      overallScore: "8.4",
-      clarityRating: "93%",
-      implementationDetail: "87%",
-      stakeholderEngagement: "76%",
-      policyElementScores: [
-        { name: "Objectives", value: 25 },
-        { name: "Implementation", value: 20 },
-        { name: "Clarity", value: 20 },
-        { name: "Equity", value: 15 },
-        { name: "Equity 2", value: 25 },
-        { name: "Funding", value: 20 },
-      ],
-      performanceByCategory: [
-        { name: "Environmental", score: 88 },
-        { name: "Economic", score: 65 },
-        { name: "Social", score: 78 },
-        { name: "Governance", score: 80 },
-        { name: "Technology", score: 70 },
-      ],
-    });
-  }, 1500);
+    const scoreAnalysisData = [
+    {
+      assessment_id: 1,
+      prompt_id: 101,
+      criteria: "Clarity of Purpose",
+      prompt_score: 7,
+      max_score: 10
+    },
+    {
+      assessment_id: 1,
+      prompt_id: 102,
+      criteria: "Impact Assessment",
+      prompt_score: 8,
+      max_score: 10
+    },
+    {
+      assessment_id: 1,
+      prompt_id: 103,
+      criteria: "Public Participation",
+      prompt_score: 6,
+      max_score: 10
+    },
+    {
+      assessment_id: 1,
+      prompt_id: 104,
+      criteria: "Feasibility",
+      prompt_score: 9,
+      max_score: 10
+    },
+    {
+      assessment_id: 2,
+      prompt_id: 104,
+      criteria: "Feasibility",
+      prompt_score: 6,
+      max_score: 10
+    },
+    {
+      assessment_id: 3,
+      prompt_id: 109,
+      criteria: "Technology",
+      prompt_score: 4,
+      max_score: 10
+    }
+  ];
+
+    res.json(scoreAnalysisData);
+  }, 2500);
 });
 
 // ---------- DOCUMENT TYPES ----------
@@ -305,6 +329,57 @@ app.get('/report/download/:doc_summary_id', (req, res) => {
   res.setHeader('Content-Disposition', `attachment; filename="draft_policy_report_${doc_summary_id}.pdf"`);
 
   fs.createReadStream(filePath).pipe(res);
+});
+
+app.get("/summary/:doc_summary_id/assessment/:assessment_id", (req, res) => {
+
+  const random_delay = parseFloat((60 + Math.random() * 30).toFixed(1)) * 100;
+  setTimeout(() => {
+    const { doc_summary_id, assessment_id } = req.params;
+    const mockResponse = {
+      assessment_id: parseInt(assessment_id, 10),
+      summary: 
+      
+      `
+        <div>
+            <h3>Data Management & Governance Summary</h3>
+            <ul>
+                <li><strong>Data Handling Skills:</strong> Develop expertise in data analysis to enable informed decision-making across all organizational levels.</li>
+                <li><strong>Data Portal Features:</strong> 
+                    <ul>
+                        <li>APIs, documentation, and developer resources for seamless integration.</li>
+                        <li>Multi-format data downloads (CSV, Excel, JSON, etc.) with bulk and subset options.</li>
+                        <li>Metadata, quality scores, and validation reports to ensure data reliability.</li>
+                        <li>Clear licensing terms, usage restrictions, and attribution requirements.</li>
+                    </ul>
+                </li>
+                <li><strong>IT & Security Measures:</strong> 
+                    <ul>
+                        <li>Encryption, anonymization, and privacy-enhancing technologies (PETs) for data protection.</li>
+                        <li>Disaster recovery plans and business continuity protocols.</li>
+                        <li>Integration of emerging technologies (AI, IoT, blockchain) for advanced data management.</li>
+                    </ul>
+                </li>
+                <li><strong>Consent Management:</strong> 
+                    <ul>
+                        <li>Explicit consent for sensitive data (health, biometrics) and third-party sharing.</li>
+                        <li>Granular opt-in/opt-out options for specific data uses and communication preferences.</li>
+                    </ul>
+                </li>
+                <li><strong>Governance Framework:</strong> 
+                    <ul>
+                        <li>Centralized oversight for data standards, security, and emerging tool adoption.</li>
+                        <li>Interdepartmental collaboration to reduce data duplication and enhance synergy.</li>
+                        <li>Capacity-building initiatives to improve data literacy and technical competency.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+      `,
+      overall_score: parseFloat((Math.random() * 10).toFixed(1)),
+    };
+    res.json(mockResponse);
+  }, random_delay);
 });
 
 app.listen(PORT, () => {

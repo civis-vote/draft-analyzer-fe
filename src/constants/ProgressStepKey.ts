@@ -4,6 +4,6 @@ export enum ProgressStepKey {
   Summarize = "summarize",
   Evaluate = "evaluate",
   Score = "score",
-  Report = "report",
+  ExecutiveSummary = "executive-summary",
   Download = "download",
 }

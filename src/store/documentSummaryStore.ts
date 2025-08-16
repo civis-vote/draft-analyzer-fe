@@ -10,11 +10,13 @@ interface DocumentSummaryStore {
   getSummary: (doc_type: number) => Promise<DocumentSummary | null>;
   updateSummary: (summary: DocumentSummary) => void;
   fetchAndSetSummaryText: (doc_summary_id: number) => Promise<SummaryResponse>;
+  reset: () => void;
 }
 
 export const useDocumentSummaryStore = create<DocumentSummaryStore>((set) => ({
   summary: null,
 
+  reset: () => set({ summary: null }),
   getSummary: async (doc_type: number) => {
     try {
       const summary = await getDocumentValidationStatus(doc_type);

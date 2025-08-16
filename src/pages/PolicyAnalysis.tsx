@@ -1,6 +1,6 @@
 import UploadSection from "@/components/upload-section/UploadSection";
 import InsightSection from "@/components/upload-section/evaluation/InsightSection";
-import PromptEvaluation from "@/components/upload-section/evaluation/PromptEvaluation";
+import EvaluationSection from "@/components/upload-section/assessment-evaluation/EvaluationSection";
 import { useDocumentStore } from "@/store/documentStore";
 import ScoreAnalysis from "@/components/upload-section/evaluation/ScoreAnalysis";
 import RightSidebar from "@/components/sidebar/RightSidebar";
@@ -19,7 +19,7 @@ export default function Home() {
           {summaryRequested && (
             <>
               <InsightSection />
-              <PromptEvaluation />
+              <EvaluationSection />
               <ScoreAnalysis />
             </>
           )}

@@ -1,12 +1,11 @@
 export interface ScoreAnalysisRequest {
-  docId: string;
+  doc_summary_id: number;
 }
 
 export interface ScoreAnalysisResponse {
-  overallScore: string;
-  clarityRating: string;
-  implementationDetail: string;
-  stakeholderEngagement: string;
-  policyElementScores: { name: string; value: number }[];
-  performanceByCategory: { name: string; score: number }[];
+  assessment_id: number;
+  prompt_id: number;
+  criteria: string;
+  prompt_score: number;
+  max_score: number;
 }
