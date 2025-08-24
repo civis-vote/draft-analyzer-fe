@@ -120,8 +120,8 @@ const AnalysisHistory: React.FC = () => {
                   <Tag color='purple' className="text-xs">
                     {transformedDoc.doc_type.toUpperCase()}
                   </Tag>
-                  <Tag color={getStatusColor(transformedDoc.status)} className="text-xs">
-                    {transformedDoc.status.toUpperCase()}
+                  <Tag color={transformedDoc.status ? getStatusColor(transformedDoc.status) : 'default'} className="text-xs">
+                    {transformedDoc.status?.toUpperCase()}
                   </Tag>
                 </div>
                 
@@ -227,7 +227,7 @@ const AnalysisHistory: React.FC = () => {
       )}
 
       <AnalysisModal
-        document={selectedDocument}
+        document_history={selectedDocument}
         visible={modalVisible}
         onClose={handleModalClose}
       />

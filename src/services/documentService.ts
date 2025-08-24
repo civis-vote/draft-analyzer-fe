@@ -2,6 +2,7 @@ import axios from "axios";
 import { UploadResponse, SummaryResponse, DocumentType, Assessment, AssessmentPrompt, UploadRequest, DocumentSummary, AssessmentAreaEvaluation } from "@/model/DocumentModels";
 import { ScoreAnalysisResponse } from "@/model/ScoreAnalysisModels";
 import { useDocumentStore } from "@/store/documentStore";
+import { ExecutiveSummary } from "@/model/HistoryModel";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -91,4 +92,13 @@ export const fetchScoreAnalysis = async (
   }
 
   return res.data;
+};
+
+export const generateExecutativeSummary = async (doc_summary_id: number): Promise<ExecutiveSummary> => {
+  
+  const response = await axios.get(`${BASE_URL}/executive-summary/${doc_summary_id}`);
+  if (response.status !== 200) {
+    throw new Error("Failed to generate executive summary");
+  }
+  return response.data;
 };

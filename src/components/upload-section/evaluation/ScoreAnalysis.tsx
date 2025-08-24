@@ -14,7 +14,7 @@ import {
   LabelList,
   Legend,
 } from "recharts";
-import { fetchScoreAnalysis } from "@/services/documentService";
+import { fetchScoreAnalysis, generateExecutativeSummary } from "@/services/documentService";
 import { ScoreAnalysisResponse } from "@/model/ScoreAnalysisModels";
 import { useProgressTrackerStore } from "@/store/progressTrackerStore";
 import { ProgressStepStatus } from "../../../constants/ProgressStatus";
@@ -90,6 +90,19 @@ const ScoreAnalysis: React.FC = () => {
       } finally {
         setLoading(false);
       }
+
+      try {
+        updateStepStatus(ProgressStepKey.ExecutiveSummary, ProgressStepStatus.Pending);
+        const executiveSummary = await generateExecutativeSummary(doc_summary_id);
+        if (executiveSummary) {
+          message.success("Executive summary generated.");
+          updateStepStatus(ProgressStepKey.ExecutiveSummary, ProgressStepStatus.Completed);
+        }
+      } catch (error) {
+        message.error("Failed to generate executive summary.");
+        updateStepStatus(ProgressStepKey.ExecutiveSummary, ProgressStepStatus.Error);
+      }
+      
     };
 
     loadData();

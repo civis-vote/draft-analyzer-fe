@@ -17,15 +17,7 @@ import { useProgressTrackerStore } from "@/store/progressTrackerStore";
 
 const { Title, Paragraph } = Typography;
 
-interface InsightSectionProps {
-  docSummaryId?: number; 
-  isHistoryMode?: boolean; 
-}
-
-const InsightSection: React.FC<InsightSectionProps> = ({ 
-  docSummaryId, 
-  isHistoryMode = false 
-}) => {
+const InsightSection: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [summaryData, setSummaryData] = useState<SummaryResponse | null>(null);
   const summaryRef = useRef<HTMLDivElement>(null);
@@ -38,23 +30,16 @@ const InsightSection: React.FC<InsightSectionProps> = ({
 
   useEffect(() => {
     const getSummary = async () => {
-      let shouldFetch = false;
-      let summaryId: number | null = null;
 
-      if (isHistoryMode && docSummaryId) {
-        shouldFetch = true;
-        summaryId = docSummaryId;
-      } else if (!isHistoryMode && summaryRequested && summary?.doc_summary_id) {
-        shouldFetch = true;
-        summaryId = summary.doc_summary_id;
+      if (!summaryRequested || !summary?.doc_summary_id) {
+        return;
       }
 
-      if (!shouldFetch || !summaryId) return;
-
       setLoading(true);
+      updateStepStatus(ProgressStepKey.Summarize, ProgressStepStatus.InProgress);
       try {
-        console.log("Fetching summary for doc_summary_id:", summaryId);
-        const response = await fetchAndSetSummaryText(summaryId);
+        console.log("Fetching summary for doc_summary_id:", summary.doc_summary_id);
+        const response = await fetchAndSetSummaryText(summary.doc_summary_id);
         setSummaryData(response);
         updateStepStatus(ProgressStepKey.Summarize, ProgressStepStatus.Completed);
 
@@ -67,7 +52,7 @@ const InsightSection: React.FC<InsightSectionProps> = ({
     };
 
     getSummary();
-  }, [docSummaryId, isHistoryMode, summaryRequested, summary?.doc_summary_id, fetchAndSetSummaryText]);
+  }, [summaryRequested, summary?.doc_summary_id, fetchAndSetSummaryText]);
 
   return (
     <Card className="shadow-lg rounded-2xl p-6 mx-auto mt-8 mb-16">

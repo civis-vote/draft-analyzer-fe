@@ -31,11 +31,11 @@ export const formatDateTime = (dateTimeString: string) => {
  */
 export const getStatusColor = (status: string): string => {
   switch (status.toLowerCase()) {
-    case 'completed':
+    case 'downloaded':
       return 'success';
-    case 'processing':
+    case 'summarized':
       return 'processing';
-    case 'failed':
+    case 'validated':
       return 'error';
     case 'pending':
       return 'warning';
@@ -45,7 +45,7 @@ export const getStatusColor = (status: string): string => {
 };
 
 
-export type StatusType = 'completed' | 'processing' | 'failed' | 'pending';
+export type StatusType = 'VALIDATED' | 'SUMMARIZED' | 'EXECUTIVE_SUMMARIZED' | 'DOWNLOADED' | 'PENDING';
 
 export interface FormattedDateTime {
   formatted: string;

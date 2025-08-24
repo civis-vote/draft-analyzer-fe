@@ -119,6 +119,48 @@ app.get('/summarize/:document_id', (req, res) => {
   }, 2000); // 2 sec delay
 });
 
+// Executive Summary Endpoint
+app.get('/executive-summary/:doc_summary_id', (req, res) => {
+  const doc_summary_id = req.params.doc_summary_id;
+  if (!doc_summary_id) return res.status(400).json({ error: "doc_summary_id is required" });
+
+  setTimeout(() => {
+
+    res.json({
+      doc_summary_id: doc_summary_id,
+      executive_summary_text:
+        `
+          <div class="executive-summary">                                                                                                                                                            
+              <h2>Haryana Electronic Toys Manufacturing Policy 2024: Executive Summary</h2>                                                                                                                                                                                     
+              <h3>Vision & Mission</h3>                                                                                                                                                                                                                                         
+              <p>Haryana aims to become a global hub for electronic toys manufacturing by fostering innovation, R&amp;D, and infrastructure development. The mission emphasizes creating a favorable ecosystem for investors and promoting Indian cultural values in toy design.</p>
+              <h3>Objectives</h3>                                                                                                                                                                                                                                               
+              <ul>                                                                                                                                                                                                                                                              
+                  <li>Attract ₹1,000 Cr in investments during the policy period.</li>                                                                                                                                                                                           
+                  <li>Strengthen R&amp;D infrastructure and promote skill development.</li>                                                                                                                                                                                     
+                  <li>Enhance domestic and international market presence for "Made in India" toys.</li>                                                                                                                                                                         
+              </ul>                                                                                                                                                                                                                                                             
+              <h3>Industry Focus</h3>                                                                                                                                                                                                                                           
+              <p>The policy addresses challenges like fragmented manufacturing, limited technical expertise, and quality control. It aligns with national initiatives such as the National Action Plan for Toys to boost local production and restrict sub-standard imports.</p>
+              <h3>Key Interventions</h3>                                                                                                                                                                                                                                        
+              <ul>                                                                                                                                                                                                                                                              
+                  <li><strong>Fiscal Incentives:</strong> Stamp duty reimbursement, electricity duty exemptions, and special packages for ultra-mega projects (₹1,000 Cr+ investments).</li>                                                                                   
+                  <li><strong>Innovation Support:</strong> Funding for design studios, R&amp;D centers, and industry-academia collaborations; reimbursements for educational toy development.</li>                                                                                 
+                  <li><strong>Regulatory Simplification:</strong> Single-window clearance via Haryana Enterprise Promotion Centre (HEPC) for approvals and incentives.</li>                                                                                                    
+              </ul>                                                                                                                                                                                                                                                             
+              <h3>Strategic Priorities</h3>                                                                                                                                                                                                                                     
+              <ul>                                                                                                                                                                                                                                                              
+                  <li>Safety standards and quality certification (BIS compliance).</li>                                                                                                                                                                                         
+                  <li>Environmental sustainability and consumer awareness.</li>                                                                                                                                                                                                 
+                  <li>Skill development programs to address workforce gaps.</li>
+              </ul>                                                                                                                                                                                  
+          </div>
+        
+          `
+    });
+  }, 1000); // 1 sec delay
+});
+
 app.post('/evaluations', (req, res) => {
   const { docId } = req.body;
 
@@ -398,7 +440,7 @@ app.get('/history/:user_id', (req, res) => {
         doc_summary_id: doc_summary_id,
         file_name: "document_analysis_report.pdf",
         summary_time: "2025-08-17T07:30:00.000Z",
-        status: "completed",
+        status: "uploaded",
         doc_type: "Consultation"
       },
       {
@@ -406,7 +448,7 @@ app.get('/history/:user_id', (req, res) => {
         doc_summary_id: doc_summary_id + 1,
         file_name: "Electronic_Toys_Policy.pdf",
         summary_time: "2025-08-16T14:22:30.000Z",
-        status: "in_progress",
+        status: "summarized",
         doc_type: "Amendment"
       },
       {
@@ -414,7 +456,7 @@ app.get('/history/:user_id', (req, res) => {
         doc_summary_id: doc_summary_id + 2,
         file_name: "maharashtra_export_policy.pdf",
         summary_time: "2025-08-15T09:45:15.000Z",
-        status: "completed",
+        status: "validated",
         doc_type: "Law Order"
       },
       {
@@ -422,7 +464,7 @@ app.get('/history/:user_id', (req, res) => {
         doc_summary_id: doc_summary_id + 3,
         file_name: "Odisha State Data Policy.pdf",
         summary_time: "2025-08-14T16:18:45.000Z",
-        status: "in_progress",
+        status: "downloaded",
         doc_type: "Consultation"
       }
     ]

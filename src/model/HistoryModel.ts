@@ -10,3 +10,14 @@ export interface DocumentHistory {
     status: string;
     doc_type: string;
 }
+
+export interface ExecutiveSummary {
+    doc_summary_id: number;
+    executive_summary_text: string;
+}
+
+export interface SummaryState {
+  text: string;
+  loading: boolean;
+  error: string | null;
+}
